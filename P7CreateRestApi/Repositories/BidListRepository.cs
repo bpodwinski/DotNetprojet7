@@ -1,65 +1,107 @@
-﻿using Dot.Net.WebApi.Data;
-using Dot.Net.WebApi.Domain;
+﻿using Microsoft.EntityFrameworkCore;
+using P7CreateRestApi.Data;
+using P7CreateRestApi.Domain;
 
 namespace P7CreateRestApi.Repositories
 {
+    /// <summary>
+    /// Repository class for managing BidList entities in the database.
+    /// </summary>
     public class BidListRepository : IBidListRepository
     {
         private readonly LocalDbContext _dbContext;
-        public BidListRepository(LocalDbContext dbContext) 
+        private readonly ILogger<BidListRepository> _logger;
+
+        public BidListRepository(LocalDbContext dbContext, ILogger<BidListRepository> logger)
         {
             _dbContext = dbContext;
+            _logger = logger;
         }
 
-        public void Create(BidList bidList)
+        /// <summary>
+        /// Asynchronously creates a new BidList entity and saves it to the database.
+        /// </summary>
+        /// <param name="bidList">The BidList entity to create.</param>
+        /// <returns>A task representing the asynchronous operation.</returns>
+        public async Task CreateAsync(BidList bidList)
         {
-            _dbContext.Bids.Add(bidList);
-            _dbContext.SaveChanges();
-        }
-
-        public BidList? Delete(int id)
-        {
-            var bidList = _dbContext.Bids.FirstOrDefault(b => b.BidListId == id);
-            if (bidList is not null)
+            try
             {
-                _dbContext.Bids.Remove(bidList);
-                _dbContext.SaveChanges();
+                await _dbContext.Bids.AddAsync(bidList);
+                await _dbContext.SaveChangesAsync();
             }
-            return bidList;
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while creating a new BidList.");
+                throw;
+            }
         }
 
-        public BidList? Get(int id) => _dbContext.Bids.FirstOrDefault(b => b.BidListId == id);
-
-        public List<BidList> List() => _dbContext.Bids.ToList();
-
-        public BidList? Update(BidList bidList)
+        /// <summary>
+        /// Asynchronously deletes a BidList entity by its ID.
+        /// </summary>
+        /// <param name="id">The ID of the BidList entity to delete.</param>
+        /// <returns>The deleted BidList entity, or null if not found.</returns>
+        public async Task<BidList?> DeleteAsync(int id)
         {
-            var bidListAModifier = _dbContext.Bids.FirstOrDefault(b => b.BidListId == bidList.BidListId);
-            if (bidListAModifier is not null)
+            try
             {
-                bidListAModifier.Account = bidList.Account;
-                bidListAModifier.BidType = bidList.BidType;
-                bidListAModifier.BidQuantity = bidList.BidQuantity;
-                bidListAModifier.AskQuantity = bidList.AskQuantity;
-                bidListAModifier.Bid = bidList.Bid;
-                bidListAModifier.Ask = bidList.Ask;
-                bidListAModifier.Benchmark = bidList.Benchmark;
-                bidListAModifier.BidListDate = bidList.BidListDate;
-                bidListAModifier.Commentary = bidList.Commentary;
-                bidListAModifier.BidSecurity = bidList.BidSecurity;
-                bidListAModifier.BidStatus = bidList.BidStatus;
-                bidListAModifier.Trader = bidList.Trader;
-                bidListAModifier.Book = bidList.Book;
-                bidListAModifier.CreationName = bidList.CreationName;
-                bidListAModifier.RevisionName = bidList.RevisionName;
-                bidListAModifier.RevisionDate = bidList.RevisionDate;
-                bidListAModifier.DealName = bidList.DealName;
-                bidListAModifier.DealType = bidList.DealType;
-                bidListAModifier.SourceListId = bidList.SourceListId;
-                bidListAModifier.Side = bidList.Side;
-                _dbContext.SaveChanges();
+                var bidList = await _dbContext.Bids.FindAsync(id);
+                if (bidList is not null)
+                {
+                    _dbContext.Bids.Remove(bidList);
+                    await _dbContext.SaveChangesAsync();
+                }
+                return bidList;
             }
-            return bidListAModifier;
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error deleting BidList with ID {id}");
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Asynchronously retrieves a BidList entity by its ID.
+        /// </summary>
+        /// <param name="id">The ID of the BidList entity to retrieve.</param>
+        /// <returns>The BidList entity, or null if not found.</returns>
+        public async Task<BidList?> GetAsync(int id)
+        {
+            return await _dbContext.Bids.FirstOrDefaultAsync(b => b.BidListId == id);
+        }
+
+        /// <summary>
+        /// Asynchronously retrieves all BidList entities from the database.
+        /// </summary>
+        /// <returns>A list of BidList entities.</returns>
+        public async Task<List<BidList>> ListAsync()
+        {
+            return await _dbContext.Bids.ToListAsync();
+        }
+
+        /// <summary>
+        /// Asynchronously updates an existing BidList entity and saves changes to the database.
+        /// </summary>
+        /// <param name="bidList">The BidList entity with updated values.</param>
+        /// <returns>The updated BidList entity, or null if not found.</returns>
+        public async Task<BidList?> UpdateAsync(BidList bidList)
+        {
+            try
+            {
+                var bidListAModifier = await _dbContext.Bids.FindAsync(bidList.BidListId);
+                if (bidListAModifier is null) return null;
+
+                _dbContext.Entry(bidListAModifier).CurrentValues.SetValues(bidList);
+                await _dbContext.SaveChangesAsync();
+
+                return bidListAModifier;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error updating BidList with ID {bidList.BidListId}");
+                throw;
+            }
         }
     }
 }
