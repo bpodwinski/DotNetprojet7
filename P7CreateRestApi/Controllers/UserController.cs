@@ -1,85 +1,136 @@
-using Dot.Net.WebApi.Domain;
-using Dot.Net.WebApi.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using P7CreateRestApi.Domain;
+using P7CreateRestApi.Models;
+using P7CreateRestApi.Services;
 
-namespace Dot.Net.WebApi.Controllers
+namespace P7CreateRestApi.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("users")]
     public class UserController : ControllerBase
     {
-        private UserRepository _userRepository;
+        private readonly IUserService _userService;
 
-        public UserController(UserRepository userRepository)
+        public UserController(IUserService userService)
         {
-            _userRepository = userRepository;
+            _userService = userService;
         }
 
+        /// <summary>
+        /// Retrieves all users.
+        /// </summary>
         [HttpGet]
-        [Route("list")]
-        public IActionResult Home()
+        [Authorize(policy: "Admin")]
+        public async Task<IActionResult> List()
         {
-            return Ok();
+            try
+            {
+                var users = await _userService.ListAsync();
+                return Ok(users);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An internal error occurred: {ex.Message}");
+            }
         }
 
-        [HttpGet]
-        [Route("add")]
-        public IActionResult AddUser([FromBody]User user)
-        {
-            return Ok();
-        }
-
-        [HttpGet]
-        [Route("validate")]
-        public IActionResult Validate([FromBody]User user)
+        /// <summary>
+        /// Adds a new user.
+        /// </summary>
+        [HttpPost]
+        [Authorize(policy: "Admin")]
+        public async Task<IActionResult> AddUser([FromBody] UserModel inputModel)
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest();
+                return BadRequest(ModelState);
             }
-           
-           _userRepository.Add(user);
 
-            return Ok();
+            try
+            {
+                var user = await _userService.CreateAsync(inputModel);
+                if (user is not null)
+                {
+                    return CreatedAtAction(nameof(GetById), new { id = user.Id }, user);
+                }
+                return BadRequest("Unable to create user.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An internal error occurred: {ex.Message}");
+            }
         }
 
-        [HttpGet]
-        [Route("update/{id}")]
-        public IActionResult ShowUpdateForm(int id)
+        /// <summary>
+        /// Retrieves a user by ID.
+        /// </summary>
+        [HttpGet("{id}")]
+        [Authorize(policy: "Admin")]
+        public IActionResult GetById(int id)
         {
-            User user = _userRepository.FindById(id);
-            
-            if (user == null)
-                throw new ArgumentException("Invalid user Id:" + id);
-
-            return Ok();
+            try
+            {
+                var user = _userService.GetByIdAsync(id);
+                if (user is not null)
+                {
+                    return Ok(user);
+                }
+                return NotFound($"User with ID {id} not found.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An internal error occurred: {ex.Message}");
+            }
         }
 
-        [HttpPost]
-        [Route("update/{id}")]
-        public IActionResult UpdateUser(int id, [FromBody] User user)
+        /// <summary>
+        /// Updates a user's details by ID.
+        /// </summary>
+        [HttpPut("{id}")]
+        [Authorize(policy: "Admin")]
+        public async Task<IActionResult> UpdateUser(int id, [FromBody] UserModel inputModel)
         {
-            // TODO: check required fields, if valid call service to update Trade and return Trade list
-            return Ok();
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            try
+            {
+                var user = await _userService.UpdateByIdAsync(id, inputModel);
+                if (user is not null)
+                {
+                    return Ok(user);
+                }
+                return NotFound($"User with ID {id} not found.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An internal error occurred: {ex.Message}");
+            }
         }
 
-        [HttpDelete]
-        [Route("{id}")]
-        public IActionResult DeleteUser(int id)
+        /// <summary>
+        /// Deletes a user by ID.
+        /// </summary>
+        [HttpDelete("{id}")]
+        [Authorize(policy: "Admin")]
+        public async Task<IActionResult> DeleteUser(int id)
         {
-            User user = _userRepository.FindById(id);
-            
-            if (user == null)
-                throw new ArgumentException("Invalid user Id:" + id);
-
-            return Ok();
-        }
-
-        [HttpGet]
-        [Route("/secure/article-details")]
-        public async Task<ActionResult<List<User>>> GetAllUserArticles()
-        {
-            return Ok();
+            try
+            {
+                var user = await _userService.DeleteByIdAsync(id);
+                if (user is not null)
+                {
+                    return NoContent();
+                }
+                return NotFound($"User with ID {id} not found.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An internal error occurred: {ex.Message}");
+            }
         }
     }
 }

@@ -1,36 +1,87 @@
-using Dot.Net.WebApi.Data;
-using Dot.Net.WebApi.Domain;
+using P7CreateRestApi.Data;
+using P7CreateRestApi.Domain;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
-namespace Dot.Net.WebApi.Repositories
+namespace P7CreateRestApi.Repositories
 {
-    public class UserRepository
+    /// <summary>
+    /// Repository class for managing User entities in the database.
+    /// </summary>
+    public class UserRepository : IUserRepository
     {
-        public LocalDbContext DbContext { get; }
+        private readonly LocalDbContext _dbContext;
+        private readonly ILogger<UserRepository> _logger;
 
-        public UserRepository(LocalDbContext dbContext)
+        public UserRepository(LocalDbContext dbContext, ILogger<UserRepository> logger)
         {
-            DbContext = dbContext;
+            _dbContext = dbContext;
+            _logger = logger;
         }
 
-        public User FindByUserName(string userName)
+        /// <summary>
+        /// Asynchronously retrieves all User entities from the database.
+        /// </summary>
+        public async Task<List<User>> FindAllAsync()
         {
-            return DbContext.Users.Where(user => user.UserName == userName)
-                                  .FirstOrDefault();
+            try
+            {
+                return await _dbContext.Users.ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while retrieving all users.");
+                throw;
+            }
         }
 
-        public async Task<List<User>> FindAll()
+        /// <summary>
+        /// Asynchronously adds a new User entity to the database.
+        /// </summary>
+        public async Task AddAsync(User user)
         {
-            return await DbContext.Users.ToListAsync();
+            try
+            {
+                await _dbContext.Users.AddAsync(user);
+                await _dbContext.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while adding a new user.");
+                throw;
+            }
         }
 
-        public void Add(User user)
+        /// <summary>
+        /// Asynchronously finds a User entity by its ID.
+        /// </summary>
+        public async Task<User?> FindByIdAsync(int id)
         {
+            try
+            {
+                return await _dbContext.Users.FirstOrDefaultAsync(user => user.Id == id);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"An error occurred while retrieving the user with ID {id}.");
+                throw;
+            }
         }
 
-        public User FindById(int id)
+        /// <summary>
+        /// Asynchronously finds a User entity by its username.
+        /// </summary>
+        public async Task<User?> FindByUserNameAsync(string username)
         {
-            return null;
+            try
+            {
+                return await _dbContext.Users.FirstOrDefaultAsync(user => user.UserName == username);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"An error occurred while retrieving the user with username {username}.");
+                throw;
+            }
         }
     }
 }
