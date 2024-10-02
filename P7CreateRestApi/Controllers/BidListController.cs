@@ -79,13 +79,20 @@ namespace P7CreateRestApi.Controllers
         /// <param name="dto">The BidListDTO object to create</param>
         /// <returns>The newly created BidListDTO</returns>
         /// <response code="201">Returns the newly created BidListDTO</response>
+        /// <response code="400">If the model is invalid</response>
         /// <response code="500">If an internal error occurs</response>
         [HttpPost]
-        [Authorize(policy: "User")]
+        //[Authorize(policy: "User")]
         [ProducesResponseType(typeof(BidListDTO), 201)]
+        [ProducesResponseType(400)]
         [ProducesResponseType(500)]
         public async Task<IActionResult> AddBidList([FromBody] BidListDTO dto)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState); // Return 400 if the model is invalid
+            }
+
             try
             {
                 var createdBidList = await _bidListService.Create(dto);
