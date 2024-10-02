@@ -89,17 +89,17 @@ namespace P7CreateRestApi.Repositories
         {
             try
             {
-                var bidListAModifier = await _dbContext.Bids.FindAsync(bidList.BidListId);
-                if (bidListAModifier is null) return null;
+                var existingBidList = await _dbContext.Bids.FindAsync(bidList.BidListId);
+                if (existingBidList is null) return null;
 
-                _dbContext.Entry(bidListAModifier).CurrentValues.SetValues(bidList);
+                _dbContext.Entry(existingBidList).CurrentValues.SetValues(bidList);
                 await _dbContext.SaveChangesAsync();
 
-                return bidListAModifier;
+                return existingBidList;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error updating BidList with ID {bidList.BidListId}");
+                _logger.LogError(ex, $"Error updating BidList with ID {bidList.BidListId}.");
                 throw;
             }
         }
