@@ -1,58 +1,129 @@
-using Dot.Net.WebApi.Domain;
 using Microsoft.AspNetCore.Mvc;
+using P7CreateRestApi.DTOs;
+using P7CreateRestApi.Models;
+using P7CreateRestApi.Services;
 
-namespace Dot.Net.WebApi.Controllers
+namespace P7CreateRestApi.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("curve")]
     public class CurveController : ControllerBase
     {
-        // TODO: Inject Curve Point service
+        private readonly ICurvePointService _curvePointService;
 
-        [HttpGet]
-        [Route("list")]
-        public IActionResult Home()
+        public CurveController(ICurvePointService curvePointService)
         {
-            return Ok();
+            _curvePointService = curvePointService;
         }
 
+        /// <summary>
+        /// Retrieves all CurvePoints.
+        /// </summary>
+        /// <returns>A list of CurvePointDTOs</returns>
         [HttpGet]
-        [Route("add")]
-        public IActionResult AddCurvePoint([FromBody]CurvePoint curvePoint)
+        public async Task<IActionResult> List()
         {
-            return Ok();
+            try
+            {
+                var curvePoints = await _curvePointService.ListAsync();
+                return Ok(curvePoints);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An internal error occurred: {ex.Message}");
+            }
         }
 
-        [HttpGet]
-        [Route("validate")]
-        public IActionResult Validate([FromBody]CurvePoint curvePoint)
-        {
-            // TODO: check data valid and save to db, after saving return bid list
-            return Ok();
-        }
-
-        [HttpGet]
-        [Route("update/{id}")]
-        public IActionResult ShowUpdateForm(int id)
-        {
-            // TODO: get CurvePoint by Id and to model then show to the form
-            return Ok();
-        }
-
+        /// <summary>
+        /// Adds a new CurvePoint.
+        /// </summary>
+        /// <param name="curvePointModel">The CurvePoint model to create</param>
+        /// <returns>The created CurvePointDTO</returns>
         [HttpPost]
-        [Route("update/{id}")]
-        public IActionResult UpdateCurvePoint(int id, [FromBody] CurvePoint curvePoint)
+        public async Task<IActionResult> AddCurvePoint([FromBody] CurvePointModel curvePointModel)
         {
-            // TODO: check required fields, if valid call service to update Curve and return Curve list
-            return Ok();
+            try
+            {
+                var createdCurvePoint = await _curvePointService.CreateAsync(curvePointModel);
+                return CreatedAtAction(nameof(GetById), new { id = createdCurvePoint.Id }, createdCurvePoint);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An internal error occurred: {ex.Message}");
+            }
         }
 
+        /// <summary>
+        /// Retrieves a CurvePoint by ID.
+        /// </summary>
+        /// <param name="id">The ID of the CurvePoint to retrieve</param>
+        /// <returns>The CurvePointDTO</returns>
+        [HttpGet]
+        [Route("{id}")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            try
+            {
+                var curvePoint = await _curvePointService.GetByIdAsync(id);
+                if (curvePoint is not null)
+                {
+                    return Ok(curvePoint);
+                }
+                return NotFound($"CurvePoint with ID {id} not found.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An internal error occurred: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Updates an existing CurvePoint.
+        /// </summary>
+        /// <param name="id">The ID of the CurvePoint to update</param>
+        /// <param name="curvePointModel">The CurvePoint model with updated values</param>
+        /// <returns>The updated CurvePointDTO</returns>
+        [HttpPut]
+        [Route("{id}")]
+        public async Task<IActionResult> UpdateCurvePoint(int id, [FromBody] CurvePointModel curvePointModel)
+        {
+            try
+            {
+                var updatedCurvePoint = await _curvePointService.UpdateByIdAsync(id, curvePointModel);
+                if (updatedCurvePoint is not null)
+                {
+                    return Ok(updatedCurvePoint);
+                }
+                return NotFound($"CurvePoint with ID {id} not found.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An internal error occurred: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Deletes a CurvePoint by ID.
+        /// </summary>
+        /// <param name="id">The ID of the CurvePoint to delete</param>
+        /// <returns>No content if successful</returns>
         [HttpDelete]
         [Route("{id}")]
-        public IActionResult DeleteBid(int id)
+        public async Task<IActionResult> DeleteCurvePoint(int id)
         {
-            // TODO: Find Curve by Id and delete the Curve, return to Curve list
-            return Ok();
+            try
+            {
+                var deletedCurvePoint = await _curvePointService.DeleteByIdAsync(id);
+                if (deletedCurvePoint is not null)
+                {
+                    return NoContent();
+                }
+                return NotFound($"CurvePoint with ID {id} not found.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An internal error occurred: {ex.Message}");
+            }
         }
     }
 }
