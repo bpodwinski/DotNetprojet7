@@ -23,7 +23,7 @@ namespace P7CreateRestApi.Repositories
         /// </summary>
         /// <param name="bidList">The BidList entity to create.</param>
         /// <returns>A task representing the asynchronous operation.</returns>
-        public async Task CreateAsync(BidList bidList)
+        public async Task Create(BidList bidList)
         {
             try
             {
@@ -42,16 +42,15 @@ namespace P7CreateRestApi.Repositories
         /// </summary>
         /// <param name="id">The ID of the BidList entity to delete.</param>
         /// <returns>The deleted BidList entity, or null if not found.</returns>
-        public async Task<BidList?> DeleteAsync(int id)
+        public async Task<BidList?> DeleteById(int id)
         {
             try
             {
-                var bidList = await _dbContext.Bids.FindAsync(id);
-                if (bidList is not null)
-                {
-                    _dbContext.Bids.Remove(bidList);
-                    await _dbContext.SaveChangesAsync();
-                }
+                var bidList = new BidList { BidListId = id };
+
+                _dbContext.Bids.Remove(bidList);
+                await _dbContext.SaveChangesAsync();
+
                 return bidList;
             }
             catch (Exception ex)
@@ -66,7 +65,7 @@ namespace P7CreateRestApi.Repositories
         /// </summary>
         /// <param name="id">The ID of the BidList entity to retrieve.</param>
         /// <returns>The BidList entity, or null if not found.</returns>
-        public async Task<BidList?> GetAsync(int id)
+        public async Task<BidList?> GetById(int id)
         {
             return await _dbContext.Bids.FirstOrDefaultAsync(b => b.BidListId == id);
         }
@@ -75,27 +74,26 @@ namespace P7CreateRestApi.Repositories
         /// Asynchronously retrieves all BidList entities from the database.
         /// </summary>
         /// <returns>A list of BidList entities.</returns>
-        public async Task<List<BidList>> ListAsync()
+        public IQueryable<BidList> GetAll()
         {
-            return await _dbContext.Bids.ToListAsync();
+            return _dbContext.Bids.AsQueryable();
         }
+
 
         /// <summary>
         /// Asynchronously updates an existing BidList entity and saves changes to the database.
         /// </summary>
         /// <param name="bidList">The BidList entity with updated values.</param>
-        /// <returns>The updated BidList entity, or null if not found.</returns>
-        public async Task<BidList?> UpdateAsync(BidList bidList)
+        /// <returns>The updated BidList entity.</returns>
+        public async Task<BidList?> Update(BidList bidList)
         {
             try
             {
-                var existingBidList = await _dbContext.Bids.FindAsync(bidList.BidListId);
-                if (existingBidList is null) return null;
+                _dbContext.Bids.Update(bidList);
 
-                _dbContext.Entry(existingBidList).CurrentValues.SetValues(bidList);
                 await _dbContext.SaveChangesAsync();
 
-                return existingBidList;
+                return bidList;
             }
             catch (Exception ex)
             {
@@ -103,5 +101,6 @@ namespace P7CreateRestApi.Repositories
                 throw;
             }
         }
+
     }
 }
