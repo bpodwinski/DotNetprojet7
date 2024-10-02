@@ -1,59 +1,121 @@
-using Dot.Net.WebApi.Domain;
 using Microsoft.AspNetCore.Mvc;
+using P7CreateRestApi.DTOs;
+using P7CreateRestApi.Models;
+using P7CreateRestApi.Services;
 
-namespace Dot.Net.WebApi.Controllers
+namespace P7CreateRestApi.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("trade")]
     public class TradeController : ControllerBase
     {
-        // TODO: Inject Trade service
+        private readonly ITradeService _tradeService;
 
-        [HttpGet]
-        [Route("list")]
-        public IActionResult Home()
+        public TradeController(ITradeService tradeService)
         {
-            // TODO: find all Trade, add to model
-            return Ok();
+            _tradeService = tradeService;
         }
 
+        /// <summary>
+        /// Retrieves all Trade items.
+        /// </summary>
         [HttpGet]
-        [Route("add")]
-        public IActionResult AddTrade([FromBody]Trade trade)
+        public async Task<IActionResult> List()
         {
-            return Ok();
+            try
+            {
+                var trades = await _tradeService.ListAsync();
+                return Ok(trades);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An internal error occurred: {ex.Message}");
+            }
         }
 
-        [HttpGet]
-        [Route("validate")]
-        public IActionResult Validate([FromBody]Trade trade)
+        /// <summary>
+        /// Retrieves a specific Trade by ID.
+        /// </summary>
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
         {
-            // TODO: check data valid and save to db, after saving return Trade list
-            return Ok();
+            try
+            {
+                var trade = await _tradeService.GetByIdAsync(id);
+                if (trade is null)
+                {
+                    return NotFound($"Trade with ID {id} not found.");
+                }
+                return Ok(trade);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An internal error occurred: {ex.Message}");
+            }
         }
 
-        [HttpGet]
-        [Route("update/{id}")]
-        public IActionResult ShowUpdateForm(int id)
-        {
-            // TODO: get Trade by Id and to model then show to the form
-            return Ok();
-        }
-
+        /// <summary>
+        /// Creates a new Trade.
+        /// </summary>
         [HttpPost]
-        [Route("update/{id}")]
-        public IActionResult UpdateTrade(int id, [FromBody] Trade trade)
+        public async Task<IActionResult> Create([FromBody] TradeModel model)
         {
-            // TODO: check required fields, if valid call service to update Trade and return Trade list
-            return Ok();
+            try
+            {
+                var createdTrade = await _tradeService.CreateAsync(model);
+                if (createdTrade is null)
+                {
+                    return BadRequest("Trade could not be created.");
+                }
+
+                return CreatedAtAction(nameof(GetById), new { id = createdTrade.TradeId }, createdTrade);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An internal error occurred: {ex.Message}");
+            }
         }
 
-        [HttpDelete]
-        [Route("{id}")]
-        public IActionResult DeleteTrade(int id)
+        /// <summary>
+        /// Updates an existing Trade.
+        /// </summary>
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateById(int id, [FromBody] TradeModel model)
         {
-            // TODO: Find Trade by Id and delete the Trade, return to Trade list
-            return Ok();
+            try
+            {
+                var updatedTrade = await _tradeService.UpdateByIdAsync(id, model);
+                if (updatedTrade is null)
+                {
+                    return NotFound($"Trade with ID {id} not found.");
+                }
+                return Ok(updatedTrade);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An internal error occurred: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Deletes a specific Trade by ID.
+        /// </summary>
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteById(int id)
+        {
+            try
+            {
+                var deletedTrade = await _tradeService.DeleteByIdAsync(id);
+                if (deletedTrade is null)
+                {
+                    return NotFound($"Trade with ID {id} not found.");
+                }
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An internal error occurred: {ex.Message}");
+            }
         }
     }
 }
