@@ -1,58 +1,129 @@
 using Microsoft.AspNetCore.Mvc;
+using P7CreateRestApi.DTOs;
+using P7CreateRestApi.Models;
+using P7CreateRestApi.Services;
 
-namespace Dot.Net.WebApi.Controllers
+namespace P7CreateRestApi.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("rulename")]
     public class RuleNameController : ControllerBase
     {
-        // TODO: Inject RuleName service
+        private readonly IRuleNameService _ruleNameService;
 
-        [HttpGet]
-        [Route("list")]
-        public IActionResult Home()
+        public RuleNameController(IRuleNameService ruleNameService)
         {
-            // TODO: find all RuleName, add to model
-            return Ok();
+            _ruleNameService = ruleNameService;
         }
 
+        /// <summary>
+        /// Retrieves all RuleName items.
+        /// </summary>
+        /// <returns>A list of RuleNameDTOs</returns>
         [HttpGet]
-        [Route("add")]
-        public IActionResult AddRuleName([FromBody]RuleName trade)
+        public async Task<IActionResult> List()
         {
-            return Ok();
+            try
+            {
+                var ruleNames = await _ruleNameService.ListAsync();
+                return Ok(ruleNames);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An internal error occurred: {ex.Message}");
+            }
         }
 
-        [HttpGet]
-        [Route("validate")]
-        public IActionResult Validate([FromBody]RuleName trade)
-        {
-            // TODO: check data valid and save to db, after saving return RuleName list
-            return Ok();
-        }
-
-        [HttpGet]
-        [Route("update/{id}")]
-        public IActionResult ShowUpdateForm(int id)
-        {
-            // TODO: get RuleName by Id and to model then show to the form
-            return Ok();
-        }
-
+        /// <summary>
+        /// Adds a new RuleName.
+        /// </summary>
+        /// <param name="model">The RuleNameModel to create</param>
+        /// <returns>The created RuleNameDTO</returns>
         [HttpPost]
-        [Route("update/{id}")]
-        public IActionResult UpdateRuleName(int id, [FromBody] RuleName rating)
+        public async Task<IActionResult> AddRuleName([FromBody] RuleNameModel model)
         {
-            // TODO: check required fields, if valid call service to update RuleName and return RuleName list
-            return Ok();
+            try
+            {
+                var createdRuleName = await _ruleNameService.CreateAsync(model);
+                return CreatedAtAction(nameof(GetById), new { id = createdRuleName.Id }, createdRuleName);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An internal error occurred: {ex.Message}");
+            }
         }
 
+        /// <summary>
+        /// Retrieves a specific RuleName by ID.
+        /// </summary>
+        /// <param name="id">The ID of the RuleName to retrieve</param>
+        /// <returns>The RuleNameDTO</returns>
+        [HttpGet]
+        [Route("{id}")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            try
+            {
+                var ruleName = await _ruleNameService.GetByIdAsync(id);
+                if (ruleName is not null)
+                {
+                    return Ok(ruleName);
+                }
+                return NotFound($"RuleName with ID {id} not found.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An internal error occurred: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Updates an existing RuleName.
+        /// </summary>
+        /// <param name="id">The ID of the RuleName to update</param>
+        /// <param name="model">The RuleName model with updated values</param>
+        /// <returns>The updated RuleNameDTO</returns>
+        [HttpPut]
+        [Route("{id}")]
+        public async Task<IActionResult> UpdateRuleName(int id, [FromBody] RuleNameModel model)
+        {
+            try
+            {
+                var updatedRuleName = await _ruleNameService.UpdateByIdAsync(id, model);
+                if (updatedRuleName is not null)
+                {
+                    return Ok(updatedRuleName);
+                }
+                return NotFound($"RuleName with ID {id} not found.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An internal error occurred: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Deletes a specific RuleName by ID.
+        /// </summary>
+        /// <param name="id">The ID of the RuleName to delete</param>
+        /// <returns>No content if successful</returns>
         [HttpDelete]
         [Route("{id}")]
-        public IActionResult DeleteRuleName(int id)
+        public async Task<IActionResult> DeleteRuleName(int id)
         {
-            // TODO: Find RuleName by Id and delete the RuleName, return to Rule list
-            return Ok();
+            try
+            {
+                var deletedRuleName = await _ruleNameService.DeleteByIdAsync(id);
+                if (deletedRuleName is not null)
+                {
+                    return NoContent();
+                }
+                return NotFound($"RuleName with ID {id} not found.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An internal error occurred: {ex.Message}");
+            }
         }
     }
 }
