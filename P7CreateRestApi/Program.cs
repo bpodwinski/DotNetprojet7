@@ -101,7 +101,7 @@ builder.Services.AddAuthorization(options =>
 
     options.AddPolicy("User", policy =>
     {
-        policy.RequireRole("User");
+        policy.RequireRole("User", "Admin");
         policy.RequireAuthenticatedUser();
         policy.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme);
     });
@@ -123,54 +123,67 @@ builder.Services.AddScoped<IUserService, UserService>();
 
 var app = builder.Build();
 
-// Ensure database is created in Development mode
+// Ensure database is migrated in Development mode
 if (app.Environment.IsDevelopment())
 {
     using (var scope = app.Services.CreateScope())
     {
         var dbcontext = scope.ServiceProvider.GetRequiredService<LocalDbContext>();
-        dbcontext.Database.EnsureCreated();
+        dbcontext.Database.Migrate();
     }
 
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-// Apply authentication and authorization middleware
-app.UseAuthentication();
-app.UseAuthorization();
-
 // Initialize roles and admin user
-using (var scope = app.Services.CreateScope())
+try
 {
-    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<int>>>();
-
-    if (!await roleManager.RoleExistsAsync("User"))
+    using (var scope = app.Services.CreateScope())
     {
-        await roleManager.CreateAsync(new IdentityRole<int> { Name = "User" });
-        await roleManager.CreateAsync(new IdentityRole<int> { Name = "Admin" });
-
+        var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<int>>>();
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
-        var admins = await userManager.GetUsersInRoleAsync("Admin");
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
 
-        if (admins.Count == 0)
+        if (!await roleManager.RoleExistsAsync("User"))
         {
-            var adminUser = new User
-            {
-                UserName = "admin",
-                FullName = "admin",
-                Role = "Admin",
-            };
+            await roleManager.CreateAsync(new IdentityRole<int> { Name = "User" });
+            await roleManager.CreateAsync(new IdentityRole<int> { Name = "Admin" });
 
-            var result = await userManager.CreateAsync(adminUser, "123456!");
+            var admins = await userManager.GetUsersInRoleAsync("Admin");
 
-            if (result.Succeeded)
+            if (admins.Count == 0)
             {
-                await userManager.AddToRoleAsync(adminUser, adminUser.Role);
+                var adminUser = new User
+                {
+                    UserName = "admin",
+                    FullName = "admin",
+                    Role = "Admin",
+                };
+
+                var result = await userManager.CreateAsync(adminUser, "123456!");
+
+                if (result.Succeeded)
+                {
+                    await userManager.AddToRoleAsync(adminUser, "Admin");
+                }
+                else
+                {
+                    logger.LogError("Failed to create admin user: {Errors}", string.Join(", ", result.Errors.Select(e => e.Description)));
+                }
             }
         }
     }
 }
+catch (Exception ex)
+{
+    var logger = app.Services.GetRequiredService<ILogger<Program>>();
+    logger.LogError(ex, "An error occurred while initializing roles and admin user.");
+}
+
+// Apply authentication and authorization middleware
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.UseHttpsRedirection();
 app.MapControllers();
