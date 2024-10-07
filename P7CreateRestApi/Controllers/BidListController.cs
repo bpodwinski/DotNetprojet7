@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using P7CreateRestApi.DTOs;
 using P7CreateRestApi.Services;
+using Microsoft.Extensions.Logging;
 
 namespace P7CreateRestApi.Controllers
 {
@@ -10,10 +11,12 @@ namespace P7CreateRestApi.Controllers
     public class BidListController : ControllerBase
     {
         private readonly IBidListService _bidListService;
+        private readonly ILogger<BidListController> _logger;
 
-        public BidListController(IBidListService bidListService)
+        public BidListController(IBidListService bidListService, ILogger<BidListController> logger)
         {
             _bidListService = bidListService;
+            _logger = logger;
         }
 
         /// <summary>
@@ -33,11 +36,13 @@ namespace P7CreateRestApi.Controllers
         {
             try
             {
+                _logger.LogInformation("Fetching all BidList items.");
                 var bidLists = await _bidListService.GetAll();
                 return Ok(bidLists);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "An error occurred while fetching BidList items.");
                 return StatusCode(500, "An internal error occurred.");
             }
         }
@@ -60,16 +65,21 @@ namespace P7CreateRestApi.Controllers
         {
             try
             {
+                _logger.LogInformation("Fetching BidList item with ID {Id}.", id);
                 var bidList = await _bidListService.GetById(id);
+
                 if (bidList is not null)
                 {
                     return Ok(bidList);
                 }
+
+                _logger.LogWarning("BidList item with ID {Id} not found.", id);
                 return NotFound($"BidList with ID {id} not found.");
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"An internal error occurred: {ex.Message}");
+                _logger.LogError(ex, "An error occurred while fetching BidList item with ID {Id}.", id);
+                return StatusCode(500, "An internal error occurred.");
             }
         }
 
@@ -82,7 +92,6 @@ namespace P7CreateRestApi.Controllers
         /// <response code="400">If the model is invalid</response>
         /// <response code="500">If an internal error occurs</response>
         [HttpPost]
-        //[Authorize(policy: "User")]
         [ProducesResponseType(typeof(BidListDTO), 201)]
         [ProducesResponseType(400)]
         [ProducesResponseType(500)]
@@ -90,16 +99,19 @@ namespace P7CreateRestApi.Controllers
         {
             if (!ModelState.IsValid)
             {
+                _logger.LogWarning("Invalid model state for creating a BidList.");
                 return BadRequest(ModelState); // Return 400 if the model is invalid
             }
 
             try
             {
+                _logger.LogInformation("Creating a new BidList item.");
                 var createdBidList = await _bidListService.Create(dto);
                 return CreatedAtAction(nameof(Get), new { id = createdBidList.BidListId }, createdBidList);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "An error occurred while creating a BidList item.");
                 return StatusCode(500, "An internal error occurred.");
             }
         }
@@ -123,16 +135,19 @@ namespace P7CreateRestApi.Controllers
         {
             try
             {
+                _logger.LogInformation("Updating BidList item with ID {Id}.", id);
                 var updatedBidList = await _bidListService.UpdateById(id, dto);
                 if (updatedBidList is not null)
                 {
                     return Ok(updatedBidList);
                 }
+                _logger.LogWarning("BidList item with ID {Id} not found for update.", id);
                 return NotFound($"BidList with ID {id} not found.");
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"An internal error occurred: {ex.Message}");
+                _logger.LogError(ex, "An error occurred while updating BidList item with ID {Id}.", id);
+                return StatusCode(500, "An internal error occurred.");
             }
         }
 
@@ -153,16 +168,19 @@ namespace P7CreateRestApi.Controllers
         {
             try
             {
+                _logger.LogInformation("Deleting BidList item with ID {Id}.", id);
                 var deletedBidList = await _bidListService.DeleteById(id);
                 if (deletedBidList is not null)
                 {
                     return NoContent();
                 }
+                _logger.LogWarning("BidList item with ID {Id} not found for deletion.", id);
                 return NotFound($"BidList with ID {id} not found.");
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"An internal error occurred: {ex.Message}");
+                _logger.LogError(ex, "An error occurred while deleting BidList item with ID {Id}.", id);
+                return StatusCode(500, "An internal error occurred.");
             }
         }
     }

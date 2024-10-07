@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using P7CreateRestApi.DTOs;
 using P7CreateRestApi.Models;
 using P7CreateRestApi.Services;
+using Microsoft.Extensions.Logging;
 
 namespace P7CreateRestApi.Controllers
 {
@@ -10,10 +11,12 @@ namespace P7CreateRestApi.Controllers
     public class RuleNameController : ControllerBase
     {
         private readonly IRuleNameService _ruleNameService;
+        private readonly ILogger<RuleNameController> _logger;
 
-        public RuleNameController(IRuleNameService ruleNameService)
+        public RuleNameController(IRuleNameService ruleNameService, ILogger<RuleNameController> logger)
         {
             _ruleNameService = ruleNameService;
+            _logger = logger;
         }
 
         /// <summary>
@@ -25,12 +28,14 @@ namespace P7CreateRestApi.Controllers
         {
             try
             {
+                _logger.LogInformation("Fetching all RuleNames.");
                 var ruleNames = await _ruleNameService.ListAsync();
                 return Ok(ruleNames);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"An internal error occurred: {ex.Message}");
+                _logger.LogError(ex, "An error occurred while fetching RuleNames.");
+                return StatusCode(500, "An internal error occurred.");
             }
         }
 
@@ -44,12 +49,14 @@ namespace P7CreateRestApi.Controllers
         {
             try
             {
+                _logger.LogInformation("Adding a new RuleName.");
                 var createdRuleName = await _ruleNameService.CreateAsync(model);
                 return CreatedAtAction(nameof(GetById), new { id = createdRuleName.Id }, createdRuleName);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"An internal error occurred: {ex.Message}");
+                _logger.LogError(ex, "An error occurred while adding a new RuleName.");
+                return StatusCode(500, "An internal error occurred.");
             }
         }
 
@@ -64,16 +71,19 @@ namespace P7CreateRestApi.Controllers
         {
             try
             {
+                _logger.LogInformation("Fetching RuleName with ID {Id}.", id);
                 var ruleName = await _ruleNameService.GetByIdAsync(id);
                 if (ruleName is not null)
                 {
                     return Ok(ruleName);
                 }
+                _logger.LogWarning("RuleName with ID {Id} not found.", id);
                 return NotFound($"RuleName with ID {id} not found.");
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"An internal error occurred: {ex.Message}");
+                _logger.LogError(ex, "An error occurred while fetching RuleName with ID {Id}.", id);
+                return StatusCode(500, "An internal error occurred.");
             }
         }
 
@@ -89,16 +99,19 @@ namespace P7CreateRestApi.Controllers
         {
             try
             {
+                _logger.LogInformation("Updating RuleName with ID {Id}.", id);
                 var updatedRuleName = await _ruleNameService.UpdateByIdAsync(id, model);
                 if (updatedRuleName is not null)
                 {
                     return Ok(updatedRuleName);
                 }
+                _logger.LogWarning("RuleName with ID {Id} not found for update.", id);
                 return NotFound($"RuleName with ID {id} not found.");
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"An internal error occurred: {ex.Message}");
+                _logger.LogError(ex, "An error occurred while updating RuleName with ID {Id}.", id);
+                return StatusCode(500, "An internal error occurred.");
             }
         }
 
@@ -113,16 +126,19 @@ namespace P7CreateRestApi.Controllers
         {
             try
             {
+                _logger.LogInformation("Deleting RuleName with ID {Id}.", id);
                 var deletedRuleName = await _ruleNameService.DeleteByIdAsync(id);
                 if (deletedRuleName is not null)
                 {
                     return NoContent();
                 }
+                _logger.LogWarning("RuleName with ID {Id} not found for deletion.", id);
                 return NotFound($"RuleName with ID {id} not found.");
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"An internal error occurred: {ex.Message}");
+                _logger.LogError(ex, "An error occurred while deleting RuleName with ID {Id}.", id);
+                return StatusCode(500, "An internal error occurred.");
             }
         }
     }

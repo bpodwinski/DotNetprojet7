@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using P7CreateRestApi.DTOs;
 using P7CreateRestApi.Models;
 using P7CreateRestApi.Services;
+using Microsoft.Extensions.Logging;
 
 namespace P7CreateRestApi.Controllers
 {
@@ -10,10 +11,12 @@ namespace P7CreateRestApi.Controllers
     public class CurveController : ControllerBase
     {
         private readonly ICurvePointService _curvePointService;
+        private readonly ILogger<CurveController> _logger;
 
-        public CurveController(ICurvePointService curvePointService)
+        public CurveController(ICurvePointService curvePointService, ILogger<CurveController> logger)
         {
             _curvePointService = curvePointService;
+            _logger = logger;
         }
 
         /// <summary>
@@ -25,12 +28,14 @@ namespace P7CreateRestApi.Controllers
         {
             try
             {
+                _logger.LogInformation("Fetching all CurvePoints.");
                 var curvePoints = await _curvePointService.ListAsync();
                 return Ok(curvePoints);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"An internal error occurred: {ex.Message}");
+                _logger.LogError(ex, "An error occurred while fetching CurvePoints.");
+                return StatusCode(500, "An internal error occurred.");
             }
         }
 
@@ -44,12 +49,14 @@ namespace P7CreateRestApi.Controllers
         {
             try
             {
+                _logger.LogInformation("Adding a new CurvePoint.");
                 var createdCurvePoint = await _curvePointService.CreateAsync(curvePointModel);
                 return CreatedAtAction(nameof(GetById), new { id = createdCurvePoint.Id }, createdCurvePoint);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"An internal error occurred: {ex.Message}");
+                _logger.LogError(ex, "An error occurred while adding a CurvePoint.");
+                return StatusCode(500, "An internal error occurred.");
             }
         }
 
@@ -64,16 +71,19 @@ namespace P7CreateRestApi.Controllers
         {
             try
             {
+                _logger.LogInformation("Fetching CurvePoint with ID {Id}.", id);
                 var curvePoint = await _curvePointService.GetByIdAsync(id);
                 if (curvePoint is not null)
                 {
                     return Ok(curvePoint);
                 }
+                _logger.LogWarning("CurvePoint with ID {Id} not found.", id);
                 return NotFound($"CurvePoint with ID {id} not found.");
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"An internal error occurred: {ex.Message}");
+                _logger.LogError(ex, "An error occurred while fetching CurvePoint with ID {Id}.", id);
+                return StatusCode(500, "An internal error occurred.");
             }
         }
 
@@ -89,16 +99,19 @@ namespace P7CreateRestApi.Controllers
         {
             try
             {
+                _logger.LogInformation("Updating CurvePoint with ID {Id}.", id);
                 var updatedCurvePoint = await _curvePointService.UpdateByIdAsync(id, curvePointModel);
                 if (updatedCurvePoint is not null)
                 {
                     return Ok(updatedCurvePoint);
                 }
+                _logger.LogWarning("CurvePoint with ID {Id} not found.", id);
                 return NotFound($"CurvePoint with ID {id} not found.");
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"An internal error occurred: {ex.Message}");
+                _logger.LogError(ex, "An error occurred while updating CurvePoint with ID {Id}.", id);
+                return StatusCode(500, "An internal error occurred.");
             }
         }
 
@@ -113,16 +126,19 @@ namespace P7CreateRestApi.Controllers
         {
             try
             {
+                _logger.LogInformation("Deleting CurvePoint with ID {Id}.", id);
                 var deletedCurvePoint = await _curvePointService.DeleteByIdAsync(id);
                 if (deletedCurvePoint is not null)
                 {
                     return NoContent();
                 }
+                _logger.LogWarning("CurvePoint with ID {Id} not found for deletion.", id);
                 return NotFound($"CurvePoint with ID {id} not found.");
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"An internal error occurred: {ex.Message}");
+                _logger.LogError(ex, "An error occurred while deleting CurvePoint with ID {Id}.", id);
+                return StatusCode(500, "An internal error occurred.");
             }
         }
     }

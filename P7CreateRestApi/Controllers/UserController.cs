@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using P7CreateRestApi.Domain;
 using P7CreateRestApi.Models;
 using P7CreateRestApi.Services;
+using Microsoft.Extensions.Logging;
 
 namespace P7CreateRestApi.Controllers
 {
@@ -11,10 +12,12 @@ namespace P7CreateRestApi.Controllers
     public class UserController : ControllerBase
     {
         private readonly IUserService _userService;
+        private readonly ILogger<UserController> _logger;
 
-        public UserController(IUserService userService)
+        public UserController(IUserService userService, ILogger<UserController> logger)
         {
             _userService = userService;
+            _logger = logger;
         }
 
         /// <summary>
@@ -26,12 +29,14 @@ namespace P7CreateRestApi.Controllers
         {
             try
             {
+                _logger.LogInformation("Fetching all users.");
                 var users = await _userService.ListAsync();
                 return Ok(users);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"An internal error occurred: {ex.Message}");
+                _logger.LogError(ex, "An error occurred while fetching users.");
+                return StatusCode(500, "An internal error occurred.");
             }
         }
 
@@ -44,21 +49,26 @@ namespace P7CreateRestApi.Controllers
         {
             if (!ModelState.IsValid)
             {
+                _logger.LogWarning("Invalid model state for adding a user.");
                 return BadRequest(ModelState);
             }
 
             try
             {
+                _logger.LogInformation("Adding a new user.");
                 var user = await _userService.CreateAsync(inputModel);
                 if (user is not null)
                 {
+                    _logger.LogInformation("User created with ID {Id}.", user.Id);
                     return CreatedAtAction(nameof(GetById), new { id = user.Id }, user);
                 }
+                _logger.LogWarning("Unable to create user.");
                 return BadRequest("Unable to create user.");
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"An internal error occurred: {ex.Message}");
+                _logger.LogError(ex, "An error occurred while adding a user.");
+                return StatusCode(500, "An internal error occurred.");
             }
         }
 
@@ -71,16 +81,19 @@ namespace P7CreateRestApi.Controllers
         {
             try
             {
+                _logger.LogInformation("Fetching user with ID {Id}.", id);
                 var user = _userService.GetByIdAsync(id);
                 if (user is not null)
                 {
                     return Ok(user);
                 }
+                _logger.LogWarning("User with ID {Id} not found.", id);
                 return NotFound($"User with ID {id} not found.");
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"An internal error occurred: {ex.Message}");
+                _logger.LogError(ex, "An error occurred while fetching user with ID {Id}.", id);
+                return StatusCode(500, "An internal error occurred.");
             }
         }
 
@@ -93,21 +106,25 @@ namespace P7CreateRestApi.Controllers
         {
             if (!ModelState.IsValid)
             {
+                _logger.LogWarning("Invalid model state for updating user with ID {Id}.", id);
                 return BadRequest(ModelState);
             }
 
             try
             {
+                _logger.LogInformation("Updating user with ID {Id}.", id);
                 var user = await _userService.UpdateByIdAsync(id, inputModel);
                 if (user is not null)
                 {
                     return Ok(user);
                 }
+                _logger.LogWarning("User with ID {Id} not found for update.", id);
                 return NotFound($"User with ID {id} not found.");
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"An internal error occurred: {ex.Message}");
+                _logger.LogError(ex, "An error occurred while updating user with ID {Id}.", id);
+                return StatusCode(500, "An internal error occurred.");
             }
         }
 
@@ -120,16 +137,19 @@ namespace P7CreateRestApi.Controllers
         {
             try
             {
+                _logger.LogInformation("Deleting user with ID {Id}.", id);
                 var user = await _userService.DeleteByIdAsync(id);
                 if (user is not null)
                 {
                     return NoContent();
                 }
+                _logger.LogWarning("User with ID {Id} not found for deletion.", id);
                 return NotFound($"User with ID {id} not found.");
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"An internal error occurred: {ex.Message}");
+                _logger.LogError(ex, "An error occurred while deleting user with ID {Id}.", id);
+                return StatusCode(500, "An internal error occurred.");
             }
         }
     }

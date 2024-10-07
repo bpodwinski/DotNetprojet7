@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using P7CreateRestApi.Models;
 using P7CreateRestApi.Services;
+using Microsoft.Extensions.Logging;
 
 namespace P7CreateRestApi.Controllers
 {
@@ -9,10 +10,12 @@ namespace P7CreateRestApi.Controllers
     public class RatingController : ControllerBase
     {
         private readonly IRatingService _ratingService;
+        private readonly ILogger<RatingController> _logger;
 
-        public RatingController(IRatingService ratingService)
+        public RatingController(IRatingService ratingService, ILogger<RatingController> logger)
         {
             _ratingService = ratingService;
+            _logger = logger;
         }
 
         /// <summary>
@@ -24,12 +27,14 @@ namespace P7CreateRestApi.Controllers
         {
             try
             {
+                _logger.LogInformation("Fetching all Ratings.");
                 var ratings = await _ratingService.ListAsync();
                 return Ok(ratings);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"An internal error occurred: {ex.Message}");
+                _logger.LogError(ex, "An error occurred while fetching Ratings.");
+                return StatusCode(500, "An internal error occurred.");
             }
         }
 
@@ -43,12 +48,14 @@ namespace P7CreateRestApi.Controllers
         {
             try
             {
+                _logger.LogInformation("Adding a new Rating.");
                 var createdRating = await _ratingService.CreateAsync(model);
                 return CreatedAtAction(nameof(GetById), new { id = createdRating.Id }, createdRating);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"An internal error occurred: {ex.Message}");
+                _logger.LogError(ex, "An error occurred while adding a Rating.");
+                return StatusCode(500, "An internal error occurred.");
             }
         }
 
@@ -63,16 +70,19 @@ namespace P7CreateRestApi.Controllers
         {
             try
             {
+                _logger.LogInformation("Fetching Rating with ID {Id}.", id);
                 var rating = await _ratingService.GetByIdAsync(id);
                 if (rating is not null)
                 {
                     return Ok(rating);
                 }
+                _logger.LogWarning("Rating with ID {Id} not found.", id);
                 return NotFound($"Rating with ID {id} not found.");
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"An internal error occurred: {ex.Message}");
+                _logger.LogError(ex, "An error occurred while fetching Rating with ID {Id}.", id);
+                return StatusCode(500, "An internal error occurred.");
             }
         }
 
@@ -88,16 +98,19 @@ namespace P7CreateRestApi.Controllers
         {
             try
             {
+                _logger.LogInformation("Updating Rating with ID {Id}.", id);
                 var updatedRating = await _ratingService.UpdateByIdAsync(id, model);
                 if (updatedRating is not null)
                 {
                     return Ok(updatedRating);
                 }
+                _logger.LogWarning("Rating with ID {Id} not found.", id);
                 return NotFound($"Rating with ID {id} not found.");
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"An internal error occurred: {ex.Message}");
+                _logger.LogError(ex, "An error occurred while updating Rating with ID {Id}.", id);
+                return StatusCode(500, "An internal error occurred.");
             }
         }
 
@@ -112,16 +125,19 @@ namespace P7CreateRestApi.Controllers
         {
             try
             {
+                _logger.LogInformation("Deleting Rating with ID {Id}.", id);
                 var deletedRating = await _ratingService.DeleteByIdAsync(id);
                 if (deletedRating is not null)
                 {
                     return NoContent();
                 }
+                _logger.LogWarning("Rating with ID {Id} not found for deletion.", id);
                 return NotFound($"Rating with ID {id} not found.");
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"An internal error occurred: {ex.Message}");
+                _logger.LogError(ex, "An error occurred while deleting Rating with ID {Id}.", id);
+                return StatusCode(500, "An internal error occurred.");
             }
         }
     }
