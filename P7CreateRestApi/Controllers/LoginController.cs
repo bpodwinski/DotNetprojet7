@@ -8,30 +8,22 @@ using System.Text;
 
 using P7CreateRestApi.Domain;
 using P7CreateRestApi.Models;
-using Microsoft.Extensions.Logging;
 
 namespace P7CreateRestApi.Controllers
 {
+    /// <summary>
+    /// Constructor for the authentication controller.
+    /// </summary>
+    /// <param name="userManager">User manager to handle user authentication and validation.</param>
+    /// <param name="config">Application configuration (used for accessing JWT settings).</param>
+    /// <param name="logger">Logging service to record events and errors.</param>
     [ApiController]
     [Route("auth")]
-    public class AuthController : ControllerBase
+    public class AuthController(UserManager<User> userManager, IConfiguration config, ILogger<AuthController> logger) : ControllerBase
     {
-        private readonly UserManager<User> _userManager;
-        private readonly IConfiguration _config;
-        private readonly ILogger<AuthController> _logger;
-
-        /// <summary>
-        /// Constructor for the authentication controller.
-        /// </summary>
-        /// <param name="userManager">User manager to handle user authentication and validation.</param>
-        /// <param name="config">Application configuration (used for accessing JWT settings).</param>
-        /// <param name="logger">Logging service to record events and errors.</param>
-        public AuthController(UserManager<User> userManager, IConfiguration config, ILogger<AuthController> logger)
-        {
-            _userManager = userManager;
-            _config = config;
-            _logger = logger;
-        }
+        private readonly UserManager<User> _userManager = userManager;
+        private readonly IConfiguration _config = config;
+        private readonly ILogger<AuthController> _logger = logger;
 
         /// <summary>
         /// Authenticates a user based on provided credentials and generates a JWT token if valid.
@@ -61,11 +53,11 @@ namespace P7CreateRestApi.Controllers
                     var key = Encoding.ASCII.GetBytes(_config["Jwt:SecretKey"]);
                     var tokenDescriptor = new SecurityTokenDescriptor
                     {
-                        Subject = new ClaimsIdentity(new Claim[]
-                        {
+                        Subject = new ClaimsIdentity(
+                        [
                             new (ClaimTypes.Name, user.UserName),
                             new (ClaimTypes.Role, user.Role)
-                        }),
+                        ]),
                         Expires = DateTime.UtcNow.AddHours(1),
                         Audience = _config["Jwt:Audience"],
                         Issuer = _config["Jwt:Issuer"],

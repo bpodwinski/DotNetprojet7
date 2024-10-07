@@ -24,7 +24,7 @@ namespace P7CreateRestApi.Services
         {
             var user = new User
             {
-                UserName = model.Username,
+                UserName = model.UserName,
                 FullName = model.FullName,
                 Role = model.Role,
             };
@@ -87,7 +87,7 @@ namespace P7CreateRestApi.Services
                 await _userManager.ResetPasswordAsync(user, token, model.Password);
             }
 
-            user.UserName = model.Username;
+            user.UserName = model.UserName;
             user.FullName = model.FullName;
             user.Role = model.Role;
 

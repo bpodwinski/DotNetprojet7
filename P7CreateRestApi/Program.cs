@@ -136,11 +136,24 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// Initialize roles and admin user
-try
+// Call the role and administrator initialization method
+await InitializeRolesAndAdminUserAsync(app.Services);
+
+// Apply authentication and authorization middleware
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.UseHttpsRedirection();
+app.MapControllers();
+app.Run();
+
+
+// Method for initializing roles and admin user
+static async Task InitializeRolesAndAdminUserAsync(IServiceProvider serviceProvider)
 {
-    using (var scope = app.Services.CreateScope())
+    try
     {
+        using var scope = serviceProvider.CreateScope();
         var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<int>>>();
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
         var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
@@ -154,37 +167,34 @@ try
 
             if (admins.Count == 0)
             {
-                var adminUser = new User
+                var user = new User
                 {
                     UserName = "admin",
-                    FullName = "admin",
+                    FullName = "Admin User",
                     Role = "Admin",
                 };
 
-                var result = await userManager.CreateAsync(adminUser, "123456!");
+                var result = await userManager.CreateAsync(user, "Ls7N0U7tmZ48!");
 
                 if (result.Succeeded)
                 {
-                    await userManager.AddToRoleAsync(adminUser, "Admin");
+                    await userManager.AddToRoleAsync(user, user.Role);
+                    logger.LogInformation("Admin user created successfully.");
                 }
                 else
                 {
                     logger.LogError("Failed to create admin user: {Errors}", string.Join(", ", result.Errors.Select(e => e.Description)));
                 }
             }
+            else
+            {
+                logger.LogInformation("Admin user already exists.");
+            }
         }
     }
+    catch (Exception ex)
+    {
+        var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred while initializing roles and admin user.");
+    }
 }
-catch (Exception ex)
-{
-    var logger = app.Services.GetRequiredService<ILogger<Program>>();
-    logger.LogError(ex, "An error occurred while initializing roles and admin user.");
-}
-
-// Apply authentication and authorization middleware
-app.UseAuthentication();
-app.UseAuthorization();
-
-app.UseHttpsRedirection();
-app.MapControllers();
-app.Run();

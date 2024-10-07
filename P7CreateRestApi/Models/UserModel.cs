@@ -6,7 +6,7 @@ namespace P7CreateRestApi.Models
     {
         [Required(ErrorMessage = "Le champs Username est requis")]
         [MinLength(3, ErrorMessage = "Le champs Username doit avoir au moins 3 caractères")]
-        public string Username { get; set; }
+        public string UserName { get; set; }
 
         [Required(ErrorMessage = "Le champs Password est requis")]
         [MinLength(8, ErrorMessage = "Le champs Password doit avoir au moins 8 caractères")]
