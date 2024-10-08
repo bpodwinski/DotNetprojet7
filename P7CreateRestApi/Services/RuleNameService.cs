@@ -31,7 +31,7 @@ namespace P7CreateRestApi.Services
                 SqlPart = inputModel.SqlPart
             };
 
-            await _ruleNameRepository.CreateAsync(ruleName);
+            await _ruleNameRepository.Create(ruleName);
             return ToDTO(ruleName);
         }
 
@@ -42,13 +42,13 @@ namespace P7CreateRestApi.Services
         /// <returns>The deleted RuleNameDTO, or null if not found</returns>
         public async Task<RuleNameDTO?> DeleteByIdAsync(int id)
         {
-            var existingRuleName = await _ruleNameRepository.GetByIdAsync(id);
+            var existingRuleName = await _ruleNameRepository.GetById(id);
             if (existingRuleName == null)
             {
                 return null;
             }
 
-            var deletedRuleName = await _ruleNameRepository.DeleteByIdAsync(id);
+            var deletedRuleName = await _ruleNameRepository.DeleteById(id);
             return deletedRuleName != null ? ToDTO(deletedRuleName) : null;
         }
 
@@ -59,7 +59,7 @@ namespace P7CreateRestApi.Services
         /// <returns>The RuleNameDTO, or null if not found</returns>
         public async Task<RuleNameDTO?> GetByIdAsync(int id)
         {
-            var ruleName = await _ruleNameRepository.GetByIdAsync(id);
+            var ruleName = await _ruleNameRepository.GetById(id);
             return ruleName != null ? ToDTO(ruleName) : null;
         }
 
@@ -69,7 +69,7 @@ namespace P7CreateRestApi.Services
         /// <returns>A list of RuleNameDTOs</returns>
         public async Task<List<RuleNameDTO>> ListAsync()
         {
-            var ruleNames = await _ruleNameRepository.ListAsync();
+            var ruleNames = await _ruleNameRepository.GetAll();
             return ruleNames.Select(ToDTO).ToList();
         }
 
@@ -81,7 +81,7 @@ namespace P7CreateRestApi.Services
         /// <returns>The updated RuleNameDTO, or null if not found</returns>
         public async Task<RuleNameDTO?> UpdateByIdAsync(int id, RuleNameModel inputModel)
         {
-            var existingRuleName = await _ruleNameRepository.GetByIdAsync(id);
+            var existingRuleName = await _ruleNameRepository.GetById(id);
             if (existingRuleName == null)
             {
                 return null;

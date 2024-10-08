@@ -22,7 +22,7 @@ namespace P7CreateRestApi.Repositories
         /// Asynchronously retrieves all Rating entities from the database.
         /// </summary>
         /// <returns>A list of Rating entities.</returns>
-        public async Task<List<Rating>> ListAsync()
+        public async Task<List<Rating>> GetAll()
         {
             try
             {
@@ -40,7 +40,7 @@ namespace P7CreateRestApi.Repositories
         /// </summary>
         /// <param name="rating">The Rating entity to create.</param>
         /// <returns>A task representing the asynchronous operation.</returns>
-        public async Task CreateAsync(Rating rating)
+        public async Task Create(Rating rating)
         {
             try
             {
@@ -59,7 +59,7 @@ namespace P7CreateRestApi.Repositories
         /// </summary>
         /// <param name="id">The ID of the Rating entity to retrieve.</param>
         /// <returns>The Rating entity, or null if not found.</returns>
-        public async Task<Rating?> GetByIdAsync(int id)
+        public async Task<Rating?> GetById(int id)
         {
             try
             {
@@ -77,17 +77,30 @@ namespace P7CreateRestApi.Repositories
         /// </summary>
         /// <param name="rating">The Rating entity with updated values.</param>
         /// <returns>The updated Rating entity.</returns>
-        public async Task<Rating?> UpdateAsync(Rating rating)
+        public async Task<Rating?> Update(Rating rating)
         {
             try
             {
-                _dbContext.Ratings.Update(rating);
+                _logger.LogInformation("Attempting to update Rating with ID {Id}.", rating.Id);
+
+                var existingRating = await _dbContext.Ratings.FindAsync(rating.Id);
+
+                if (existingRating == null)
+                {
+                    _logger.LogWarning("Rating with ID {Id} not found for update.", rating.Id);
+                    return null;
+                }
+
+                _dbContext.Entry(existingRating).CurrentValues.SetValues(rating);
+
                 await _dbContext.SaveChangesAsync();
-                return rating;
+                _logger.LogInformation("Successfully updated Rating with ID {Id}.", rating.Id);
+
+                return existingRating;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"An error occurred while updating the Rating with ID {rating.Id}.");
+                _logger.LogError(ex, "An error occurred while updating the Rating with ID {Id}.", rating.Id);
                 throw;
             }
         }
@@ -97,7 +110,7 @@ namespace P7CreateRestApi.Repositories
         /// </summary>
         /// <param name="id">The ID of the Rating entity to delete.</param>
         /// <returns>The deleted Rating entity.</returns>
-        public async Task<Rating?> DeleteByIdAsync(int id)
+        public async Task<Rating?> DeleteById(int id)
         {
             try
             {

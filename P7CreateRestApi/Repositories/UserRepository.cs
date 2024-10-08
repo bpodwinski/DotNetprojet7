@@ -1,7 +1,6 @@
 using P7CreateRestApi.Data;
 using P7CreateRestApi.Domain;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 
 namespace P7CreateRestApi.Repositories
 {
@@ -22,7 +21,7 @@ namespace P7CreateRestApi.Repositories
         /// <summary>
         /// Asynchronously retrieves all User entities from the database.
         /// </summary>
-        public async Task<List<User>> FindAllAsync()
+        public async Task<List<User>> FindAll()
         {
             try
             {
@@ -38,7 +37,7 @@ namespace P7CreateRestApi.Repositories
         /// <summary>
         /// Asynchronously adds a new User entity to the database.
         /// </summary>
-        public async Task AddAsync(User user)
+        public async Task Add(User user)
         {
             try
             {
@@ -55,7 +54,7 @@ namespace P7CreateRestApi.Repositories
         /// <summary>
         /// Asynchronously finds a User entity by its ID.
         /// </summary>
-        public async Task<User?> FindByIdAsync(int id)
+        public async Task<User?> FindById(int id)
         {
             try
             {
@@ -71,7 +70,7 @@ namespace P7CreateRestApi.Repositories
         /// <summary>
         /// Asynchronously finds a User entity by its username.
         /// </summary>
-        public async Task<User?> FindByUserNameAsync(string username)
+        public async Task<User?> FindByUserName(string username)
         {
             try
             {

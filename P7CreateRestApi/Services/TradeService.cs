@@ -42,7 +42,7 @@ namespace P7CreateRestApi.Services
                 SourceListId = model.SourceListId,
                 Side = model.Side
             };
-            await _tradeRepository.CreateAsync(trade);
+            await _tradeRepository.Create(trade);
             return ToDTO(trade);
         }
 
@@ -51,7 +51,7 @@ namespace P7CreateRestApi.Services
         /// </summary>
         public async Task<TradeDTO?> DeleteByIdAsync(int id)
         {
-            var trade = await _tradeRepository.DeleteByIdAsync(id);
+            var trade = await _tradeRepository.DeleteById(id);
             return trade is not null ? ToDTO(trade) : null;
         }
 
@@ -60,7 +60,7 @@ namespace P7CreateRestApi.Services
         /// </summary>
         public async Task<TradeDTO?> GetByIdAsync(int id)
         {
-            var trade = await _tradeRepository.GetByIdAsync(id);
+            var trade = await _tradeRepository.GetById(id);
             return trade is not null ? ToDTO(trade) : null;
         }
 
@@ -69,7 +69,7 @@ namespace P7CreateRestApi.Services
         /// </summary>
         public async Task<List<TradeDTO>> ListAsync()
         {
-            var trades = await _tradeRepository.ListAsync();
+            var trades = await _tradeRepository.GetAll();
             return trades.Select(ToDTO).ToList();
         }
 

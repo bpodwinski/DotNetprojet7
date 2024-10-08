@@ -11,7 +11,7 @@ namespace P7CreateRestApi.Repositories
         /// Asynchronously retrieves all CurvePoint entities from the database.
         /// </summary>
         /// <returns>A list of CurvePoint entities.</returns>
-        Task<List<CurvePoint>> List();
+        Task<List<CurvePoint>> GetAll();
 
         /// <summary>
         /// Asynchronously creates a new CurvePoint entity and saves it to the database.

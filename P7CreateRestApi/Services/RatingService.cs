@@ -28,7 +28,7 @@ namespace P7CreateRestApi.Services
                 FitchRating = model.FitchRating,
                 OrderNumber = model.OrderNumber
             };
-            await _ratingRepository.CreateAsync(rating);
+            await _ratingRepository.Create(rating);
             return ToDTO(rating);
         }
 
@@ -40,13 +40,13 @@ namespace P7CreateRestApi.Services
         public async Task<RatingDTO?> DeleteByIdAsync(int id)
         {
             // Vérifier si le Rating existe avant suppression
-            var existingRating = await _ratingRepository.GetByIdAsync(id);
+            var existingRating = await _ratingRepository.GetById(id);
             if (existingRating == null)
             {
                 return null;
             }
 
-            var deletedRating = await _ratingRepository.DeleteByIdAsync(id);
+            var deletedRating = await _ratingRepository.DeleteById(id);
             return deletedRating != null ? ToDTO(deletedRating) : null;
         }
 
@@ -57,7 +57,7 @@ namespace P7CreateRestApi.Services
         /// <returns>The RatingDTO, or null if not found</returns>
         public async Task<RatingDTO?> GetByIdAsync(int id)
         {
-            var rating = await _ratingRepository.GetByIdAsync(id);
+            var rating = await _ratingRepository.GetById(id);
             return rating != null ? ToDTO(rating) : null;
         }
 
@@ -67,7 +67,7 @@ namespace P7CreateRestApi.Services
         /// <returns>A list of RatingDTOs</returns>
         public async Task<List<RatingDTO>> ListAsync()
         {
-            var ratings = await _ratingRepository.ListAsync();
+            var ratings = await _ratingRepository.GetAll();
             return ratings.Select(ToDTO).ToList();
         }
 
@@ -80,7 +80,7 @@ namespace P7CreateRestApi.Services
         public async Task<RatingDTO?> UpdateByIdAsync(int id, RatingModel model)
         {
             // Vérification si le Rating existe avant mise à jour
-            var existingRating = await _ratingRepository.GetByIdAsync(id);
+            var existingRating = await _ratingRepository.GetById(id);
             if (existingRating == null)
             {
                 return null;
@@ -91,7 +91,7 @@ namespace P7CreateRestApi.Services
             existingRating.FitchRating = model.FitchRating;
             existingRating.OrderNumber = model.OrderNumber;
 
-            var updatedRating = await _ratingRepository.UpdateAsync(existingRating);
+            var updatedRating = await _ratingRepository.Update(existingRating);
             return ToDTO(updatedRating);
         }
 

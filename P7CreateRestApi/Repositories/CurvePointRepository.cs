@@ -22,10 +22,11 @@ namespace P7CreateRestApi.Repositories
         /// Asynchronously retrieves all CurvePoint entities from the database.
         /// </summary>
         /// <returns>A list of CurvePoint entities.</returns>
-        public async Task<List<CurvePoint>> List()
+        public async Task<List<CurvePoint>> GetAll()
         {
             try
             {
+                _logger.LogInformation("Fetching all CurvePoints.");
                 return await _dbContext.CurvePoints.ToListAsync();
             }
             catch (Exception ex)
@@ -39,13 +40,14 @@ namespace P7CreateRestApi.Repositories
         /// Asynchronously creates a new CurvePoint entity and saves it to the database.
         /// </summary>
         /// <param name="curvePoint">The CurvePoint entity to create.</param>
-        /// <returns>A task representing the asynchronous operation.</returns>
         public async Task Create(CurvePoint curvePoint)
         {
             try
             {
+                _logger.LogInformation("Creating a new CurvePoint.");
                 await _dbContext.CurvePoints.AddAsync(curvePoint);
                 await _dbContext.SaveChangesAsync();
+                _logger.LogInformation("Successfully created a new CurvePoint with ID {Id}.", curvePoint.Id);
             }
             catch (Exception ex)
             {
@@ -63,7 +65,13 @@ namespace P7CreateRestApi.Repositories
         {
             try
             {
-                return await _dbContext.CurvePoints.FirstOrDefaultAsync(c => c.Id == id);
+                _logger.LogInformation("Fetching CurvePoint with ID {Id}.", id);
+                var curvePoint = await _dbContext.CurvePoints.FirstOrDefaultAsync(c => c.Id == id);
+                if (curvePoint == null)
+                {
+                    _logger.LogWarning("CurvePoint with ID {Id} not found.", id);
+                }
+                return curvePoint;
             }
             catch (Exception ex)
             {
@@ -77,33 +85,59 @@ namespace P7CreateRestApi.Repositories
         /// </summary>
         /// <param name="curvePoint">The CurvePoint entity with updated values.</param>
         /// <returns>The updated CurvePoint entity.</returns>
-        public async Task<CurvePoint> Update(CurvePoint curvePoint)
+        public async Task<CurvePoint?> Update(CurvePoint curvePoint)
         {
             try
             {
-                _dbContext.CurvePoints.Update(curvePoint);
+                _logger.LogInformation("Attempting to update CurvePoint with ID {Id}.", curvePoint.Id);
+
+                var existingCurvePoint = await _dbContext.CurvePoints.FindAsync(curvePoint.Id);
+
+                if (existingCurvePoint == null)
+                {
+                    _logger.LogWarning("CurvePoint with ID {Id} not found for update.", curvePoint.Id);
+                    return null;
+                }
+
+                _dbContext.Entry(existingCurvePoint).CurrentValues.SetValues(curvePoint);
+
                 await _dbContext.SaveChangesAsync();
-                return curvePoint;
+                _logger.LogInformation("Successfully updated CurvePoint with ID {Id}.", curvePoint.Id);
+
+                return existingCurvePoint;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"An error occurred while updating the CurvePoint with ID {curvePoint.Id}.");
+                _logger.LogError(ex, "An error occurred while updating the CurvePoint with ID {Id}.", curvePoint.Id);
                 throw;
             }
         }
+
 
         /// <summary>
         /// Asynchronously deletes a CurvePoint entity by its ID.
         /// </summary>
         /// <param name="id">The ID of the CurvePoint entity to delete.</param>
         /// <returns>The deleted CurvePoint entity.</returns>
-        public async Task<CurvePoint> DeleteById(int id)
+        public async Task<CurvePoint?> DeleteById(int id)
         {
             try
             {
-                var curvePoint = new CurvePoint { Id = id };
+                _logger.LogInformation("Attempting to delete CurvePoint with ID {Id}.", id);
+
+                // Fetch the CurvePoint first to ensure it's tracked properly
+                var curvePoint = await _dbContext.CurvePoints.FindAsync(id);
+
+                if (curvePoint == null)
+                {
+                    _logger.LogWarning("CurvePoint with ID {Id} not found.", id);
+                    return null;
+                }
+
                 _dbContext.CurvePoints.Remove(curvePoint);
                 await _dbContext.SaveChangesAsync();
+                _logger.LogInformation("Successfully deleted CurvePoint with ID {Id}.", id);
+
                 return curvePoint;
             }
             catch (Exception ex)

@@ -29,6 +29,7 @@ namespace P7CreateRestApi.Repositories
             {
                 await _dbContext.Bids.AddAsync(bidList);
                 await _dbContext.SaveChangesAsync();
+                _logger.LogInformation("Successfully created BidList with ID {BidListId}.", bidList.BidListId);
             }
             catch (Exception ex)
             {
@@ -46,16 +47,23 @@ namespace P7CreateRestApi.Repositories
         {
             try
             {
-                var bidList = new BidList { BidListId = id };
+                var bidList = await _dbContext.Bids.FindAsync(id);
+
+                if (bidList == null)
+                {
+                    _logger.LogWarning("Attempted to delete BidList with ID {Id}, but it was not found.", id);
+                    return null;
+                }
 
                 _dbContext.Bids.Remove(bidList);
                 await _dbContext.SaveChangesAsync();
+                _logger.LogInformation("Successfully deleted BidList with ID {Id}.", id);
 
                 return bidList;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error deleting BidList with ID {id}");
+                _logger.LogError(ex, "Error deleting BidList with ID {Id}.", id);
                 throw;
             }
         }
@@ -67,7 +75,25 @@ namespace P7CreateRestApi.Repositories
         /// <returns>The BidList entity, or null if not found.</returns>
         public async Task<BidList?> GetById(int id)
         {
-            return await _dbContext.Bids.FirstOrDefaultAsync(b => b.BidListId == id);
+            try
+            {
+                var bidList = await _dbContext.Bids.FirstOrDefaultAsync(b => b.BidListId == id);
+                if (bidList == null)
+                {
+                    _logger.LogWarning("BidList with ID {Id} was not found.", id);
+                }
+                else
+                {
+                    _logger.LogInformation("Successfully retrieved BidList with ID {Id}.", id);
+                }
+
+                return bidList;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while retrieving BidList with ID {Id}.", id);
+                throw;
+            }
         }
 
         /// <summary>
@@ -76,9 +102,17 @@ namespace P7CreateRestApi.Repositories
         /// <returns>A list of BidList entities.</returns>
         public IQueryable<BidList> GetAll()
         {
-            return _dbContext.Bids.AsQueryable();
+            try
+            {
+                _logger.LogInformation("Retrieving all BidList entities.");
+                return _dbContext.Bids.AsQueryable();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while retrieving all BidList entities.");
+                throw;
+            }
         }
-
 
         /// <summary>
         /// Asynchronously updates an existing BidList entity and saves changes to the database.
@@ -89,15 +123,26 @@ namespace P7CreateRestApi.Repositories
         {
             try
             {
-                _dbContext.Bids.Update(bidList);
+                _logger.LogInformation("Attempting to update BidList with ID {BidListId}.", bidList.BidListId);
+
+                var existingBidList = await _dbContext.Bids.FindAsync(bidList.BidListId);
+
+                if (existingBidList == null)
+                {
+                    _logger.LogWarning("BidList with ID {BidListId} not found for update.", bidList.BidListId);
+                    return null;
+                }
+
+                _dbContext.Entry(existingBidList).CurrentValues.SetValues(bidList);
 
                 await _dbContext.SaveChangesAsync();
+                _logger.LogInformation("Successfully updated BidList with ID {BidListId}.", bidList.BidListId);
 
-                return bidList;
+                return existingBidList;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error updating BidList with ID {bidList.BidListId}.");
+                _logger.LogError(ex, "An error occurred while updating the BidList with ID {BidListId}.", bidList.BidListId);
                 throw;
             }
         }

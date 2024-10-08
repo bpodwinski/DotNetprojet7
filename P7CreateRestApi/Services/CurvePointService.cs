@@ -20,7 +20,7 @@ namespace P7CreateRestApi.Services
         /// <returns>A list of CurvePointDTOs</returns>
         public async Task<List<CurvePointDTO>> ListAsync()
         {
-            var curvePoints = await _curvePointRepository.List();
+            var curvePoints = await _curvePointRepository.GetAll();
             return curvePoints.Select(ToDTO).ToList();
         }
 

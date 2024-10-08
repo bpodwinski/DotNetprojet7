@@ -43,7 +43,7 @@ namespace P7CreateRestApi.Services
         /// </summary>
         public async Task<UserDTO?> DeleteByIdAsync(int id)
         {
-            var user = await _userRepository.FindByIdAsync(id);
+            var user = await _userRepository.FindById(id);
             if (user is not null)
             {
                 var result = await _userManager.DeleteAsync(user);
@@ -60,7 +60,7 @@ namespace P7CreateRestApi.Services
         /// </summary>
         public async Task<UserDTO?> GetByIdAsync(int id)
         {
-            var user = await _userRepository.FindByIdAsync(id);
+            var user = await _userRepository.FindById(id);
             return user is not null ? ToOutputModel(user) : null;
         }
 
@@ -69,7 +69,7 @@ namespace P7CreateRestApi.Services
         /// </summary>
         public async Task<List<UserDTO>> ListAsync()
         {
-            var users = await _userRepository.FindAllAsync();
+            var users = await _userRepository.FindAll();
             return users.Select(ToOutputModel).ToList();
         }
 
@@ -78,7 +78,7 @@ namespace P7CreateRestApi.Services
         /// </summary>
         public async Task<UserDTO?> UpdateByIdAsync(int id, UserModel model)
         {
-            var user = await _userRepository.FindByIdAsync(id);
+            var user = await _userRepository.FindById(id);
             if (user is null) return null;
 
             if (!await _userManager.CheckPasswordAsync(user, model.Password))
