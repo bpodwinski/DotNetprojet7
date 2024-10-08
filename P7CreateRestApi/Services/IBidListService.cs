@@ -40,6 +40,6 @@ namespace P7CreateRestApi.Services
         /// <param name="id">The ID of the BidList to update.</param>
         /// <param name="dto">The DTO containing the updated values.</param>
         /// <returns>A task representing the asynchronous operation, with the updated BidListDTO, or null if not found.</returns>
-        Task<BidListDTO?> UpdateById(int id, BidListDTO dto);
+        Task<BidListDTO?> Update(int id, BidListDTO dto);
     }
 }

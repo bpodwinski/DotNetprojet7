@@ -84,7 +84,7 @@ namespace P7CreateRestApi.Services
         /// <param name="id">The ID of the BidList to update.</param>
         /// <param name="dto">The DTO containing the updated values.</param>
         /// <returns>The updated BidListDTO, or null if not found.</returns>
-        public async Task<BidListDTO?> UpdateById(int id, BidListDTO dto)
+        public async Task<BidListDTO?> Update(int id, BidListDTO dto)
         {
             _ = await _bidListRepository.GetById(id)
                 ?? throw new Exception($"BidList with ID {id} not found.");

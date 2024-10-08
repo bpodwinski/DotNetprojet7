@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using P7CreateRestApi.Models;
+using P7CreateRestApi.DTOs;
 using P7CreateRestApi.Services;
 
 namespace P7CreateRestApi.Controllers
@@ -28,7 +28,7 @@ namespace P7CreateRestApi.Controllers
             try
             {
                 _logger.LogInformation("Fetching all users.");
-                var users = await _userService.ListAsync();
+                var users = await _userService.GetAll();
                 return Ok(users);
             }
             catch (Exception ex)
@@ -43,7 +43,7 @@ namespace P7CreateRestApi.Controllers
         /// </summary>
         [HttpPost]
         [Authorize(policy: "Admin")]
-        public async Task<IActionResult> AddUser([FromBody] UserModel inputModel)
+        public async Task<IActionResult> AddUser([FromBody] UserDTO dto)
         {
             if (!ModelState.IsValid)
             {
@@ -54,7 +54,7 @@ namespace P7CreateRestApi.Controllers
             try
             {
                 _logger.LogInformation("Adding a new user.");
-                var user = await _userService.CreateAsync(inputModel);
+                var user = await _userService.Create(dto);
                 if (user is not null)
                 {
                     _logger.LogInformation("User created with ID {Id}.", user.Id);
@@ -80,7 +80,7 @@ namespace P7CreateRestApi.Controllers
             try
             {
                 _logger.LogInformation("Fetching user with ID {Id}.", id);
-                var user = _userService.GetByIdAsync(id);
+                var user = _userService.GetById(id);
                 if (user is not null)
                 {
                     return Ok(user);
@@ -100,7 +100,7 @@ namespace P7CreateRestApi.Controllers
         /// </summary>
         [HttpPut("{id}")]
         [Authorize(policy: "Admin")]
-        public async Task<IActionResult> UpdateUser(int id, [FromBody] UserModel inputModel)
+        public async Task<IActionResult> UpdateUser(int id, [FromBody] UserDTO dto)
         {
             if (!ModelState.IsValid)
             {
@@ -111,7 +111,7 @@ namespace P7CreateRestApi.Controllers
             try
             {
                 _logger.LogInformation("Updating user with ID {Id}.", id);
-                var user = await _userService.UpdateByIdAsync(id, inputModel);
+                var user = await _userService.Update(id, dto);
                 if (user is not null)
                 {
                     return Ok(user);
@@ -136,7 +136,7 @@ namespace P7CreateRestApi.Controllers
             try
             {
                 _logger.LogInformation("Deleting user with ID {Id}.", id);
-                var user = await _userService.DeleteByIdAsync(id);
+                var user = await _userService.DeleteById(id);
                 if (user is not null)
                 {
                     return NoContent();

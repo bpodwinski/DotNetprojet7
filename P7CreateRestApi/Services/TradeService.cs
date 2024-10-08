@@ -1,6 +1,5 @@
 ﻿using P7CreateRestApi.Domain;
 using P7CreateRestApi.DTOs;
-using P7CreateRestApi.Models;
 using P7CreateRestApi.Repositories;
 
 namespace P7CreateRestApi.Services
@@ -15,32 +14,32 @@ namespace P7CreateRestApi.Services
         }
 
         /// <summary>
-        /// Asynchronously creates a new Trade based on the provided model.
+        /// Asynchronously creates a new Trade based on the provided dto.
         /// </summary>
-        public async Task<TradeDTO?> CreateAsync(TradeModel model)
+        public async Task<TradeDTO?> Create(TradeDTO dto)
         {
             var trade = new Trade
             {
-                Account = model.Account,
-                AccountType = model.AccountType,
-                BuyQuantity = model.BuyQuantity,
-                SellQuantity = model.SellQuantity,
-                BuyPrice = model.BuyPrice,
-                SellPrice = model.SellPrice,
-                TradeDate = model.TradeDate,
-                TradeSecurity = model.TradeSecurity,
-                TradeStatus = model.TradeStatus,
-                Trader = model.Trader,
-                Benchmark = model.Benchmark,
-                Book = model.Book,
-                CreationName = model.CreationName,
+                Account = dto.Account,
+                AccountType = dto.AccountType,
+                BuyQuantity = dto.BuyQuantity,
+                SellQuantity = dto.SellQuantity,
+                BuyPrice = dto.BuyPrice,
+                SellPrice = dto.SellPrice,
+                TradeDate = dto.TradeDate,
+                TradeSecurity = dto.TradeSecurity,
+                TradeStatus = dto.TradeStatus,
+                Trader = dto.Trader,
+                Benchmark = dto.Benchmark,
+                Book = dto.Book,
+                CreationName = dto.CreationName,
                 CreationDate = DateTime.Now,
-                RevisionName = model.RevisionName,
-                RevisionDate = model.RevisionDate,
-                DealName = model.DealName,
-                DealType = model.DealType,
-                SourceListId = model.SourceListId,
-                Side = model.Side
+                RevisionName = dto.RevisionName,
+                RevisionDate = dto.RevisionDate,
+                DealName = dto.DealName,
+                DealType = dto.DealType,
+                SourceListId = dto.SourceListId,
+                Side = dto.Side
             };
             await _tradeRepository.Create(trade);
             return ToDTO(trade);
@@ -49,7 +48,7 @@ namespace P7CreateRestApi.Services
         /// <summary>
         /// Asynchronously deletes a Trade by its ID.
         /// </summary>
-        public async Task<TradeDTO?> DeleteByIdAsync(int id)
+        public async Task<TradeDTO?> Delete(int id)
         {
             var trade = await _tradeRepository.DeleteById(id);
             return trade is not null ? ToDTO(trade) : null;
@@ -58,7 +57,7 @@ namespace P7CreateRestApi.Services
         /// <summary>
         /// Asynchronously retrieves a Trade by its ID.
         /// </summary>
-        public async Task<TradeDTO?> GetByIdAsync(int id)
+        public async Task<TradeDTO?> GetById(int id)
         {
             var trade = await _tradeRepository.GetById(id);
             return trade is not null ? ToDTO(trade) : null;
@@ -67,7 +66,7 @@ namespace P7CreateRestApi.Services
         /// <summary>
         /// Asynchronously retrieves all Trade entities.
         /// </summary>
-        public async Task<List<TradeDTO>> ListAsync()
+        public async Task<List<TradeDTO>> GetAll()
         {
             var trades = await _tradeRepository.GetAll();
             return trades.Select(ToDTO).ToList();
@@ -76,30 +75,30 @@ namespace P7CreateRestApi.Services
         /// <summary>
         /// Asynchronously updates an existing Trade by its ID.
         /// </summary>
-        public async Task<TradeDTO?> UpdateByIdAsync(int id, TradeModel model)
+        public async Task<TradeDTO?> Update(int id, TradeDTO dto)
         {
             var trade = new Trade
             {
                 TradeId = id,
-                Account = model.Account,
-                AccountType = model.AccountType,
-                BuyQuantity = model.BuyQuantity,
-                SellQuantity = model.SellQuantity,
-                BuyPrice = model.BuyPrice,
-                SellPrice = model.SellPrice,
-                TradeDate = model.TradeDate,
-                TradeSecurity = model.TradeSecurity,
-                TradeStatus = model.TradeStatus,
-                Trader = model.Trader,
-                Benchmark = model.Benchmark,
-                Book = model.Book,
-                CreationName = model.CreationName,
-                RevisionName = model.RevisionName,
-                RevisionDate = model.RevisionDate,
-                DealName = model.DealName,
-                DealType = model.DealType,
-                SourceListId = model.SourceListId,
-                Side = model.Side
+                Account = dto.Account,
+                AccountType = dto.AccountType,
+                BuyQuantity = dto.BuyQuantity,
+                SellQuantity = dto.SellQuantity,
+                BuyPrice = dto.BuyPrice,
+                SellPrice = dto.SellPrice,
+                TradeDate = dto.TradeDate,
+                TradeSecurity = dto.TradeSecurity,
+                TradeStatus = dto.TradeStatus,
+                Trader = dto.Trader,
+                Benchmark = dto.Benchmark,
+                Book = dto.Book,
+                CreationName = dto.CreationName,
+                RevisionName = dto.RevisionName,
+                RevisionDate = dto.RevisionDate,
+                DealName = dto.DealName,
+                DealType = dto.DealType,
+                SourceListId = dto.SourceListId,
+                Side = dto.Side
             };
 
             var updatedTrade = await _tradeRepository.UpdateAsync(trade);
@@ -109,7 +108,7 @@ namespace P7CreateRestApi.Services
         /// <summary>
         /// Converts a Trade entity to a TradeDTO.
         /// </summary>
-        private TradeDTO ToDTO(Trade trade) => new TradeDTO
+        private TradeDTO ToDTO(Trade trade) => new()
         {
             TradeId = trade.TradeId,
             Account = trade.Account,

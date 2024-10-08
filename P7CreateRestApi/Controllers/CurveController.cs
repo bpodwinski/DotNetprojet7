@@ -33,7 +33,7 @@ namespace P7CreateRestApi.Controllers
             try
             {
                 _logger.LogInformation("Fetching all CurvePoints.");
-                var curvePoints = await _curvePointService.ListAsync();
+                var curvePoints = await _curvePointService.GetAll();
                 return Ok(curvePoints);
             }
             catch (Exception ex)
@@ -61,7 +61,7 @@ namespace P7CreateRestApi.Controllers
             try
             {
                 _logger.LogInformation("Adding a new CurvePoint.");
-                var createdCurvePoint = await _curvePointService.CreateAsync(CurvePointDTO);
+                var createdCurvePoint = await _curvePointService.Create(CurvePointDTO);
                 return CreatedAtAction(nameof(GetById), new { id = createdCurvePoint.Id }, createdCurvePoint);
             }
             catch (Exception ex)
@@ -90,7 +90,7 @@ namespace P7CreateRestApi.Controllers
             try
             {
                 _logger.LogInformation("Fetching CurvePoint with ID {Id}.", id);
-                var curvePoint = await _curvePointService.GetByIdAsync(id);
+                var curvePoint = await _curvePointService.GetById(id);
                 if (curvePoint is not null)
                 {
                     return Ok(curvePoint);
@@ -125,7 +125,7 @@ namespace P7CreateRestApi.Controllers
             try
             {
                 _logger.LogInformation("Updating CurvePoint with ID {Id}.", id);
-                var updatedCurvePoint = await _curvePointService.UpdateByIdAsync(id, CurvePointDTO);
+                var updatedCurvePoint = await _curvePointService.Update(id, CurvePointDTO);
                 if (updatedCurvePoint is not null)
                 {
                     return Ok(updatedCurvePoint);
@@ -159,7 +159,7 @@ namespace P7CreateRestApi.Controllers
             try
             {
                 _logger.LogInformation("Deleting CurvePoint with ID {Id}.", id);
-                var deletedCurvePoint = await _curvePointService.DeleteByIdAsync(id);
+                var deletedCurvePoint = await _curvePointService.DeleteById(id);
                 if (deletedCurvePoint is not null)
                 {
                     return NoContent();

@@ -1,5 +1,4 @@
 ﻿using P7CreateRestApi.DTOs;
-using P7CreateRestApi.Models;
 
 namespace P7CreateRestApi.Services
 {
@@ -12,35 +11,35 @@ namespace P7CreateRestApi.Services
         /// Asynchronously retrieves all CurvePoint entities and maps them to DTOs.
         /// </summary>
         /// <returns>A list of CurvePointDTOs</returns>
-        Task<List<CurvePointDTO>> ListAsync();
+        Task<List<CurvePointDTO>> GetAll();
 
         /// <summary>
         /// Asynchronously creates a new CurvePoint entity based on the provided model.
         /// </summary>
-        /// <param name="model">The CurvePointModel object containing the data for the new entity</param>
+        /// <param name="dto">The CurvePointModel object containing the data for the new entity</param>
         /// <returns>The created CurvePointDTO</returns>
-        Task<CurvePointDTO?> CreateAsync(CurvePointModel model);
+        Task<CurvePointDTO?> Create(CurvePointDTO dto);
 
         /// <summary>
         /// Asynchronously retrieves a specific CurvePoint by ID.
         /// </summary>
         /// <param name="id">The ID of the CurvePoint to retrieve</param>
         /// <returns>The CurvePointDTO or null if not found</returns>
-        Task<CurvePointDTO?> GetByIdAsync(int id);
+        Task<CurvePointDTO?> GetById(int id);
 
         /// <summary>
         /// Asynchronously updates a specific CurvePoint entity.
         /// </summary>
         /// <param name="id">The ID of the CurvePoint to update</param>
-        /// <param name="model">The CurvePointModel with updated values</param>
+        /// <param name="dto">The CurvePointModel with updated values</param>
         /// <returns>The updated CurvePointDTO or null if not found</returns>
-        Task<CurvePointDTO?> UpdateByIdAsync(int id, CurvePointModel model);
+        Task<CurvePointDTO?> Update(int id, CurvePointDTO dto);
 
         /// <summary>
         /// Asynchronously deletes a specific CurvePoint by ID.
         /// </summary>
         /// <param name="id">The ID of the CurvePoint to delete</param>
         /// <returns>The deleted CurvePointDTO or null if not found</returns>
-        Task<CurvePointDTO?> DeleteByIdAsync(int id);
+        Task<CurvePointDTO?> DeleteById(int id);
     }
 }

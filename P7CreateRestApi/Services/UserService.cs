@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using P7CreateRestApi.Domain;
 using P7CreateRestApi.DTOs;
-using P7CreateRestApi.Models;
 using P7CreateRestApi.Repositories;
 
 namespace P7CreateRestApi.Services
@@ -18,22 +17,22 @@ namespace P7CreateRestApi.Services
         }
 
         /// <summary>
-        /// Creates a new user based on the provided model.
+        /// Creates a new user based on the provided dto.
         /// </summary>
-        public async Task<UserDTO?> CreateAsync(UserModel model)
+        public async Task<UserDTO?> Create(UserDTO dto)
         {
             var user = new User
             {
-                UserName = model.UserName,
-                FullName = model.FullName,
-                Role = model.Role,
+                UserName = dto.Username,
+                FullName = dto.FullName,
+                Role = dto.Role,
             };
 
-            var result = await _userManager.CreateAsync(user, model.Password);
+            var result = await _userManager.CreateAsync(user, dto.Password);
             if (result.Succeeded)
             {
                 await _userManager.AddToRoleAsync(user, user.Role);
-                return ToOutputModel(user);
+                return ToOutputdto(user);
             }
             return null;
         }
@@ -41,7 +40,7 @@ namespace P7CreateRestApi.Services
         /// <summary>
         /// Deletes a user by ID.
         /// </summary>
-        public async Task<UserDTO?> DeleteByIdAsync(int id)
+        public async Task<UserDTO?> DeleteById(int id)
         {
             var user = await _userRepository.FindById(id);
             if (user is not null)
@@ -49,7 +48,7 @@ namespace P7CreateRestApi.Services
                 var result = await _userManager.DeleteAsync(user);
                 if (result.Succeeded)
                 {
-                    return ToOutputModel(user);
+                    return ToOutputdto(user);
                 }
             }
             return null;
@@ -58,47 +57,47 @@ namespace P7CreateRestApi.Services
         /// <summary>
         /// Retrieves a user by ID.
         /// </summary>
-        public async Task<UserDTO?> GetByIdAsync(int id)
+        public async Task<UserDTO?> GetById(int id)
         {
             var user = await _userRepository.FindById(id);
-            return user is not null ? ToOutputModel(user) : null;
+            return user is not null ? ToOutputdto(user) : null;
         }
 
         /// <summary>
         /// Retrieves all users.
         /// </summary>
-        public async Task<List<UserDTO>> ListAsync()
+        public async Task<List<UserDTO>> GetAll()
         {
             var users = await _userRepository.FindAll();
-            return users.Select(ToOutputModel).ToList();
+            return users.Select(ToOutputdto).ToList();
         }
 
         /// <summary>
         /// Updates a user's information and resets password if necessary.
         /// </summary>
-        public async Task<UserDTO?> UpdateByIdAsync(int id, UserModel model)
+        public async Task<UserDTO?> Update(int id, UserDTO dto)
         {
             var user = await _userRepository.FindById(id);
             if (user is null) return null;
 
-            if (!await _userManager.CheckPasswordAsync(user, model.Password))
+            if (!await _userManager.CheckPasswordAsync(user, dto.Password))
             {
                 var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-                await _userManager.ResetPasswordAsync(user, token, model.Password);
+                await _userManager.ResetPasswordAsync(user, token, dto.Password);
             }
 
-            user.UserName = model.UserName;
-            user.FullName = model.FullName;
-            user.Role = model.Role;
+            user.UserName = dto.Username;
+            user.FullName = dto.FullName;
+            user.Role = dto.Role;
 
             var result = await _userManager.UpdateAsync(user);
-            return result.Succeeded ? ToOutputModel(user) : null;
+            return result.Succeeded ? ToOutputdto(user) : null;
         }
 
         /// <summary>
         /// Converts a User entity to a UserDTO.
         /// </summary>
-        private static UserDTO ToOutputModel(User user) => new UserDTO
+        private static UserDTO ToOutputdto(User user) => new()
         {
             Id = user.Id,
             Username = user.UserName,

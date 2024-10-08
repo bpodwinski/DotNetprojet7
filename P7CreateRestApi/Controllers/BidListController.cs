@@ -136,7 +136,7 @@ namespace P7CreateRestApi.Controllers
             try
             {
                 _logger.LogInformation("Updating BidList item with ID {Id}.", id);
-                var updatedBidList = await _bidListService.UpdateById(id, dto);
+                var updatedBidList = await _bidListService.Update(id, dto);
                 if (updatedBidList is not null)
                 {
                     return Ok(updatedBidList);

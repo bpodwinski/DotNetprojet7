@@ -1,6 +1,5 @@
 ﻿using P7CreateRestApi.Domain;
 using P7CreateRestApi.DTOs;
-using P7CreateRestApi.Models;
 using P7CreateRestApi.Repositories;
 
 namespace P7CreateRestApi.Services
@@ -15,18 +14,18 @@ namespace P7CreateRestApi.Services
         }
 
         /// <summary>
-        /// Creates a new Rating based on the provided model.
+        /// Creates a new Rating based on the provided dto.
         /// </summary>
-        /// <param name="model">The RatingModel containing the data to create the Rating</param>
+        /// <param name="dto">The RatingDTO containing the data to create the Rating</param>
         /// <returns>The created RatingDTO</returns>
-        public async Task<RatingDTO?> CreateAsync(RatingModel model)
+        public async Task<RatingDTO?> Create(RatingDTO dto)
         {
             var rating = new Rating
             {
-                MoodysRating = model.MoodysRating,
-                SandPRating = model.SandPRating,
-                FitchRating = model.FitchRating,
-                OrderNumber = model.OrderNumber
+                MoodysRating = dto.MoodysRating,
+                SandPRating = dto.SandPRating,
+                FitchRating = dto.FitchRating,
+                OrderNumber = dto.OrderNumber
             };
             await _ratingRepository.Create(rating);
             return ToDTO(rating);
@@ -37,9 +36,8 @@ namespace P7CreateRestApi.Services
         /// </summary>
         /// <param name="id">The ID of the Rating to delete</param>
         /// <returns>The deleted RatingDTO, or null if not found</returns>
-        public async Task<RatingDTO?> DeleteByIdAsync(int id)
+        public async Task<RatingDTO?> Delete(int id)
         {
-            // Vérifier si le Rating existe avant suppression
             var existingRating = await _ratingRepository.GetById(id);
             if (existingRating == null)
             {
@@ -55,7 +53,7 @@ namespace P7CreateRestApi.Services
         /// </summary>
         /// <param name="id">The ID of the Rating to retrieve</param>
         /// <returns>The RatingDTO, or null if not found</returns>
-        public async Task<RatingDTO?> GetByIdAsync(int id)
+        public async Task<RatingDTO?> GetById(int id)
         {
             var rating = await _ratingRepository.GetById(id);
             return rating != null ? ToDTO(rating) : null;
@@ -65,7 +63,7 @@ namespace P7CreateRestApi.Services
         /// Retrieves all Rating entities and maps them to DTOs.
         /// </summary>
         /// <returns>A list of RatingDTOs</returns>
-        public async Task<List<RatingDTO>> ListAsync()
+        public async Task<List<RatingDTO>> GetAll()
         {
             var ratings = await _ratingRepository.GetAll();
             return ratings.Select(ToDTO).ToList();
@@ -75,9 +73,9 @@ namespace P7CreateRestApi.Services
         /// Updates a specific Rating entity.
         /// </summary>
         /// <param name="id">The ID of the Rating to update</param>
-        /// <param name="model">The RatingModel containing the updated values</param>
+        /// <param name="dto">The RatingDTO containing the updated values</param>
         /// <returns>The updated RatingDTO, or null if not found</returns>
-        public async Task<RatingDTO?> UpdateByIdAsync(int id, RatingModel model)
+        public async Task<RatingDTO?> Update(int id, RatingDTO dto)
         {
             // Vérification si le Rating existe avant mise à jour
             var existingRating = await _ratingRepository.GetById(id);
@@ -86,10 +84,10 @@ namespace P7CreateRestApi.Services
                 return null;
             }
 
-            existingRating.MoodysRating = model.MoodysRating;
-            existingRating.SandPRating = model.SandPRating;
-            existingRating.FitchRating = model.FitchRating;
-            existingRating.OrderNumber = model.OrderNumber;
+            existingRating.MoodysRating = dto.MoodysRating;
+            existingRating.SandPRating = dto.SandPRating;
+            existingRating.FitchRating = dto.FitchRating;
+            existingRating.OrderNumber = dto.OrderNumber;
 
             var updatedRating = await _ratingRepository.Update(existingRating);
             return ToDTO(updatedRating);

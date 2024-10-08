@@ -17,18 +17,18 @@ namespace P7CreateRestApi.Services
         /// <summary>
         /// Creates a new RuleName based on the provided model.
         /// </summary>
-        /// <param name="inputModel">The RuleNameModel containing the data to create the RuleName</param>
+        /// <param name="dto">The RuleNameDTO containing the data to create the RuleName</param>
         /// <returns>The created RuleNameDTO</returns>
-        public async Task<RuleNameDTO?> CreateAsync(RuleNameModel inputModel)
+        public async Task<RuleNameDTO?> Create(RuleNameDTO dto)
         {
             var ruleName = new RuleName
             {
-                Name = inputModel.Name,
-                Description = inputModel.Description,
-                Json = inputModel.Json,
-                Template = inputModel.Template,
-                SqlStr = inputModel.SqlStr,
-                SqlPart = inputModel.SqlPart
+                Name = dto.Name,
+                Description = dto.Description,
+                Json = dto.Json,
+                Template = dto.Template,
+                SqlStr = dto.SqlStr,
+                SqlPart = dto.SqlPart
             };
 
             await _ruleNameRepository.Create(ruleName);
@@ -40,7 +40,7 @@ namespace P7CreateRestApi.Services
         /// </summary>
         /// <param name="id">The ID of the RuleName to delete</param>
         /// <returns>The deleted RuleNameDTO, or null if not found</returns>
-        public async Task<RuleNameDTO?> DeleteByIdAsync(int id)
+        public async Task<RuleNameDTO?> DeleteById(int id)
         {
             var existingRuleName = await _ruleNameRepository.GetById(id);
             if (existingRuleName == null)
@@ -57,7 +57,7 @@ namespace P7CreateRestApi.Services
         /// </summary>
         /// <param name="id">The ID of the RuleName to retrieve</param>
         /// <returns>The RuleNameDTO, or null if not found</returns>
-        public async Task<RuleNameDTO?> GetByIdAsync(int id)
+        public async Task<RuleNameDTO?> GetById(int id)
         {
             var ruleName = await _ruleNameRepository.GetById(id);
             return ruleName != null ? ToDTO(ruleName) : null;
@@ -67,7 +67,7 @@ namespace P7CreateRestApi.Services
         /// Retrieves all RuleName entities and maps them to DTOs.
         /// </summary>
         /// <returns>A list of RuleNameDTOs</returns>
-        public async Task<List<RuleNameDTO>> ListAsync()
+        public async Task<List<RuleNameDTO>> GetAll()
         {
             var ruleNames = await _ruleNameRepository.GetAll();
             return ruleNames.Select(ToDTO).ToList();
@@ -77,9 +77,9 @@ namespace P7CreateRestApi.Services
         /// Updates a specific RuleName entity.
         /// </summary>
         /// <param name="id">The ID of the RuleName to update</param>
-        /// <param name="inputModel">The RuleNameModel containing the updated values</param>
+        /// <param name="dto">The RuleNameDTO containing the updated values</param>
         /// <returns>The updated RuleNameDTO, or null if not found</returns>
-        public async Task<RuleNameDTO?> UpdateByIdAsync(int id, RuleNameModel inputModel)
+        public async Task<RuleNameDTO?> Update(int id, RuleNameDTO dto)
         {
             var existingRuleName = await _ruleNameRepository.GetById(id);
             if (existingRuleName == null)
@@ -87,12 +87,12 @@ namespace P7CreateRestApi.Services
                 return null;
             }
 
-            existingRuleName.Name = inputModel.Name;
-            existingRuleName.Description = inputModel.Description;
-            existingRuleName.Json = inputModel.Json;
-            existingRuleName.Template = inputModel.Template;
-            existingRuleName.SqlStr = inputModel.SqlStr;
-            existingRuleName.SqlPart = inputModel.SqlPart;
+            existingRuleName.Name = dto.Name;
+            existingRuleName.Description = dto.Description;
+            existingRuleName.Json = dto.Json;
+            existingRuleName.Template = dto.Template;
+            existingRuleName.SqlStr = dto.SqlStr;
+            existingRuleName.SqlPart = dto.SqlPart;
 
             var updatedRuleName = await _ruleNameRepository.UpdateAsync(existingRuleName);
             return ToDTO(updatedRuleName);

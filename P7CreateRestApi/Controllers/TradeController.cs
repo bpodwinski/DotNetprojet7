@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using P7CreateRestApi.Models;
+using P7CreateRestApi.DTOs;
 using P7CreateRestApi.Services;
 
 namespace P7CreateRestApi.Controllers
@@ -26,14 +26,14 @@ namespace P7CreateRestApi.Controllers
         /// <response code="500">If an internal error occurs</response>
         [Authorize(policy: "User")]
         [HttpGet]
-        [ProducesResponseType(typeof(List<TradeModel>), 200)]
+        [ProducesResponseType(typeof(List<TradeDTO>), 200)]
         [ProducesResponseType(500)]
-        public async Task<IActionResult> List()
+        public async Task<IActionResult> GetAll()
         {
             try
             {
                 _logger.LogInformation("Fetching all trades.");
-                var trades = await _tradeService.ListAsync();
+                var trades = await _tradeService.GetAll();
                 return Ok(trades);
             }
             catch (Exception ex)
@@ -53,7 +53,7 @@ namespace P7CreateRestApi.Controllers
         /// <response code="500">If an internal error occurs</response>
         [Authorize(policy: "User")]
         [HttpGet("{id}")]
-        [ProducesResponseType(typeof(TradeModel), 200)]
+        [ProducesResponseType(typeof(TradeDTO), 200)]
         [ProducesResponseType(404)]
         [ProducesResponseType(500)]
         public async Task<IActionResult> GetById(int id)
@@ -61,7 +61,7 @@ namespace P7CreateRestApi.Controllers
             try
             {
                 _logger.LogInformation("Fetching trade with ID {Id}.", id);
-                var trade = await _tradeService.GetByIdAsync(id);
+                var trade = await _tradeService.GetById(id);
                 if (trade is null)
                 {
                     _logger.LogWarning("Trade with ID {Id} not found.", id);
@@ -79,22 +79,22 @@ namespace P7CreateRestApi.Controllers
         /// <summary>
         /// Creates a new Trade.
         /// </summary>
-        /// <param name="model">The Trade model to create</param>
+        /// <param name="dto">The Trade dto to create</param>
         /// <returns>The newly created TradeDTO</returns>
         /// <response code="201">Returns the newly created TradeDTO</response>
-        /// <response code="400">If the model is invalid</response>
+        /// <response code="400">If the dto is invalid</response>
         /// <response code="500">If an internal error occurs</response>
         [Authorize(policy: "Admin")]
         [HttpPost]
-        [ProducesResponseType(typeof(TradeModel), 201)]
+        [ProducesResponseType(typeof(TradeDTO), 201)]
         [ProducesResponseType(400)]
         [ProducesResponseType(500)]
-        public async Task<IActionResult> Create([FromBody] TradeModel model)
+        public async Task<IActionResult> Create([FromBody] TradeDTO dto)
         {
             try
             {
                 _logger.LogInformation("Creating a new trade.");
-                var createdTrade = await _tradeService.CreateAsync(model);
+                var createdTrade = await _tradeService.Create(dto);
                 if (createdTrade is null)
                 {
                     _logger.LogWarning("Trade could not be created.");
@@ -115,22 +115,22 @@ namespace P7CreateRestApi.Controllers
         /// Updates an existing Trade.
         /// </summary>
         /// <param name="id">The ID of the Trade to update</param>
-        /// <param name="model">The Trade model with updated values</param>
+        /// <param name="dto">The Trade dto with updated values</param>
         /// <returns>The updated TradeDTO</returns>
         /// <response code="200">Returns the updated TradeDTO</response>
         /// <response code="404">If the Trade with the specified ID is not found</response>
         /// <response code="500">If an internal error occurs</response>
         [Authorize(policy: "Admin")]
         [HttpPut("{id}")]
-        [ProducesResponseType(typeof(TradeModel), 200)]
+        [ProducesResponseType(typeof(TradeDTO), 200)]
         [ProducesResponseType(404)]
         [ProducesResponseType(500)]
-        public async Task<IActionResult> UpdateById(int id, [FromBody] TradeModel model)
+        public async Task<IActionResult> Update(int id, [FromBody] TradeDTO dto)
         {
             try
             {
                 _logger.LogInformation("Updating trade with ID {Id}.", id);
-                var updatedTrade = await _tradeService.UpdateByIdAsync(id, model);
+                var updatedTrade = await _tradeService.Update(id, dto);
                 if (updatedTrade is null)
                 {
                     _logger.LogWarning("Trade with ID {Id} not found.", id);
@@ -158,12 +158,12 @@ namespace P7CreateRestApi.Controllers
         [ProducesResponseType(204)]
         [ProducesResponseType(404)]
         [ProducesResponseType(500)]
-        public async Task<IActionResult> DeleteById(int id)
+        public async Task<IActionResult> Delete(int id)
         {
             try
             {
                 _logger.LogInformation("Deleting trade with ID {Id}.", id);
-                var deletedTrade = await _tradeService.DeleteByIdAsync(id);
+                var deletedTrade = await _tradeService.Delete(id);
                 if (deletedTrade is null)
                 {
                     _logger.LogWarning("Trade with ID {Id} not found.", id);

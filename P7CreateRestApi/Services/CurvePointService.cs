@@ -1,6 +1,5 @@
 ﻿using P7CreateRestApi.Domain;
 using P7CreateRestApi.DTOs;
-using P7CreateRestApi.Models;
 using P7CreateRestApi.Repositories;
 
 namespace P7CreateRestApi.Services
@@ -18,25 +17,25 @@ namespace P7CreateRestApi.Services
         /// Retrieves all CurvePoint entities and maps them to DTOs.
         /// </summary>
         /// <returns>A list of CurvePointDTOs</returns>
-        public async Task<List<CurvePointDTO>> ListAsync()
+        public async Task<List<CurvePointDTO>> GetAll()
         {
             var curvePoints = await _curvePointRepository.GetAll();
             return curvePoints.Select(ToDTO).ToList();
         }
 
         /// <summary>
-        /// Creates a new CurvePoint entity based on the provided model.
+        /// Creates a new CurvePoint entity based on the provided dto.
         /// </summary>
-        /// <param name="model">The CurvePointModel object containing the data for the new entity</param>
+        /// <param name="dto">The CurvePointDTO object containing the data for the new entity</param>
         /// <returns>The created CurvePointDTO</returns>
-        public async Task<CurvePointDTO?> CreateAsync(CurvePointModel model)
+        public async Task<CurvePointDTO?> Create(CurvePointDTO dto)
         {
             var curvePoint = new CurvePoint
             {
-                CurveId = model.CurveId,
-                AsOfDate = model.AsOfDate,
-                Term = model.Term,
-                CurvePointValue = model.CurvePointValue,
+                CurveId = dto.CurveId,
+                AsOfDate = dto.AsOfDate,
+                Term = dto.Term,
+                CurvePointValue = dto.CurvePointValue,
                 CreationDate = DateTime.Now
             };
             await _curvePointRepository.Create(curvePoint);
@@ -48,7 +47,7 @@ namespace P7CreateRestApi.Services
         /// </summary>
         /// <param name="id">The ID of the CurvePoint to retrieve</param>
         /// <returns>The CurvePointDTO or null if not found</returns>
-        public async Task<CurvePointDTO?> GetByIdAsync(int id)
+        public async Task<CurvePointDTO?> GetById(int id)
         {
             var curvePoint = await _curvePointRepository.GetById(id);
             return curvePoint != null ? ToDTO(curvePoint) : null;
@@ -58,9 +57,9 @@ namespace P7CreateRestApi.Services
         /// Updates a specific CurvePoint entity.
         /// </summary>
         /// <param name="id">The ID of the CurvePoint to update</param>
-        /// <param name="model">The CurvePointModel with updated values</param>
+        /// <param name="dto">The CurvePointDTO with updated values</param>
         /// <returns>The updated CurvePointDTO or null if not found</returns>
-        public async Task<CurvePointDTO?> UpdateByIdAsync(int id, CurvePointModel model)
+        public async Task<CurvePointDTO?> Update(int id, CurvePointDTO dto)
         {
             var existingCurvePoint = await _curvePointRepository.GetById(id);
             if (existingCurvePoint == null)
@@ -69,10 +68,10 @@ namespace P7CreateRestApi.Services
             }
 
             // Mise à jour de l'entité
-            existingCurvePoint.CurveId = model.CurveId;
-            existingCurvePoint.AsOfDate = model.AsOfDate;
-            existingCurvePoint.Term = model.Term;
-            existingCurvePoint.CurvePointValue = model.CurvePointValue;
+            existingCurvePoint.CurveId = dto.CurveId;
+            existingCurvePoint.AsOfDate = dto.AsOfDate;
+            existingCurvePoint.Term = dto.Term;
+            existingCurvePoint.CurvePointValue = dto.CurvePointValue;
 
             var updatedCurvePoint = await _curvePointRepository.Update(existingCurvePoint);
             return ToDTO(updatedCurvePoint);
@@ -83,7 +82,7 @@ namespace P7CreateRestApi.Services
         /// </summary>
         /// <param name="id">The ID of the CurvePoint to delete</param>
         /// <returns>The deleted CurvePointDTO or null if not found</returns>
-        public async Task<CurvePointDTO?> DeleteByIdAsync(int id)
+        public async Task<CurvePointDTO?> DeleteById(int id)
         {
             var existingCurvePoint = await _curvePointRepository.GetById(id);
             if (existingCurvePoint == null)
