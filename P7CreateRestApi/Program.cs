@@ -7,11 +7,18 @@ using P7CreateRestApi.Data;
 using P7CreateRestApi.Domain;
 using P7CreateRestApi.Repositories;
 using P7CreateRestApi.Services;
+using Serilog;
 using System.Reflection;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 ConfigurationManager configuration = builder.Configuration;
+
+// Configure Serilog to write logs to a file
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.File("P7CreateRestApi.log", rollingInterval: RollingInterval.Day) // One file per day
+    .CreateLogger();
+builder.Host.UseSerilog();
 
 // Add services to the container.
 builder.Services.AddControllers();
@@ -136,6 +143,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+// Use Serilog to record logs
+app.UseSerilogRequestLogging();
+
 // Call the role and administrator initialization method
 await InitializeRolesAndAdminUserAsync(app.Services);
 
@@ -170,7 +180,7 @@ static async Task InitializeRolesAndAdminUserAsync(IServiceProvider serviceProvi
                 var user = new User
                 {
                     UserName = "admin",
-                    FullName = "Admin User",
+                    FullName = "Super Admin",
                     Role = "Admin",
                 };
 
