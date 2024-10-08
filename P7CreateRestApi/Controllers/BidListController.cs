@@ -92,6 +92,7 @@ namespace P7CreateRestApi.Controllers
         /// <response code="400">If the model is invalid</response>
         /// <response code="500">If an internal error occurs</response>
         [HttpPost]
+        [Authorize(policy: "Admin")]
         [ProducesResponseType(typeof(BidListDTO), 201)]
         [ProducesResponseType(400)]
         [ProducesResponseType(500)]
@@ -100,7 +101,7 @@ namespace P7CreateRestApi.Controllers
             if (!ModelState.IsValid)
             {
                 _logger.LogWarning("Invalid model state for creating a BidList.");
-                return BadRequest(ModelState); // Return 400 if the model is invalid
+                return BadRequest(ModelState);
             }
 
             try
@@ -127,7 +128,7 @@ namespace P7CreateRestApi.Controllers
         /// <response code="500">If an internal error occurs</response>
         [HttpPut]
         [Route("{id}")]
-        [Authorize(policy: "User")]
+        [Authorize(policy: "Admin")]
         [ProducesResponseType(typeof(BidListDTO), 200)]
         [ProducesResponseType(404)]
         [ProducesResponseType(500)]
@@ -160,7 +161,7 @@ namespace P7CreateRestApi.Controllers
         /// <response code="500">If an internal error occurs</response>
         [HttpDelete]
         [Route("{id}")]
-        [Authorize(policy: "User")]
+        [Authorize(policy: "Admin")]
         [ProducesResponseType(204)]
         [ProducesResponseType(404)]
         [ProducesResponseType(500)]

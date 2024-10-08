@@ -1,8 +1,7 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using P7CreateRestApi.DTOs;
 using P7CreateRestApi.Models;
 using P7CreateRestApi.Services;
-using Microsoft.Extensions.Logging;
 
 namespace P7CreateRestApi.Controllers
 {
@@ -23,6 +22,7 @@ namespace P7CreateRestApi.Controllers
         /// Retrieves all RuleName items.
         /// </summary>
         /// <returns>A list of RuleNameDTOs</returns>
+        [Authorize(policy: "User")]
         [HttpGet]
         public async Task<IActionResult> List()
         {
@@ -44,6 +44,7 @@ namespace P7CreateRestApi.Controllers
         /// </summary>
         /// <param name="model">The RuleNameModel to create</param>
         /// <returns>The created RuleNameDTO</returns>
+        [Authorize(policy: "Admin")]
         [HttpPost]
         public async Task<IActionResult> AddRuleName([FromBody] RuleNameModel model)
         {
@@ -65,6 +66,7 @@ namespace P7CreateRestApi.Controllers
         /// </summary>
         /// <param name="id">The ID of the RuleName to retrieve</param>
         /// <returns>The RuleNameDTO</returns>
+        [Authorize(policy: "User")]
         [HttpGet]
         [Route("{id}")]
         public async Task<IActionResult> GetById(int id)
@@ -93,6 +95,7 @@ namespace P7CreateRestApi.Controllers
         /// <param name="id">The ID of the RuleName to update</param>
         /// <param name="model">The RuleName model with updated values</param>
         /// <returns>The updated RuleNameDTO</returns>
+        [Authorize(policy: "Admin")]
         [HttpPut]
         [Route("{id}")]
         public async Task<IActionResult> UpdateRuleName(int id, [FromBody] RuleNameModel model)
@@ -120,6 +123,7 @@ namespace P7CreateRestApi.Controllers
         /// </summary>
         /// <param name="id">The ID of the RuleName to delete</param>
         /// <returns>No content if successful</returns>
+        [Authorize(policy: "Admin")]
         [HttpDelete]
         [Route("{id}")]
         public async Task<IActionResult> DeleteRuleName(int id)

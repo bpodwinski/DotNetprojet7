@@ -1,8 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
-using P7CreateRestApi.DTOs;
 using P7CreateRestApi.Models;
 using P7CreateRestApi.Services;
-using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Authorization;
 
 namespace P7CreateRestApi.Controllers
 {
@@ -23,6 +22,7 @@ namespace P7CreateRestApi.Controllers
         /// Retrieves all CurvePoints.
         /// </summary>
         /// <returns>A list of CurvePointDTOs</returns>
+        [Authorize(policy: "User")]
         [HttpGet]
         public async Task<IActionResult> List()
         {
@@ -44,6 +44,7 @@ namespace P7CreateRestApi.Controllers
         /// </summary>
         /// <param name="curvePointModel">The CurvePoint model to create</param>
         /// <returns>The created CurvePointDTO</returns>
+        [Authorize(policy: "Admin")]
         [HttpPost]
         public async Task<IActionResult> AddCurvePoint([FromBody] CurvePointModel curvePointModel)
         {
@@ -65,6 +66,7 @@ namespace P7CreateRestApi.Controllers
         /// </summary>
         /// <param name="id">The ID of the CurvePoint to retrieve</param>
         /// <returns>The CurvePointDTO</returns>
+        [Authorize(policy: "User")]
         [HttpGet]
         [Route("{id}")]
         public async Task<IActionResult> GetById(int id)
@@ -93,6 +95,7 @@ namespace P7CreateRestApi.Controllers
         /// <param name="id">The ID of the CurvePoint to update</param>
         /// <param name="curvePointModel">The CurvePoint model with updated values</param>
         /// <returns>The updated CurvePointDTO</returns>
+        [Authorize(policy: "Admin")]
         [HttpPut]
         [Route("{id}")]
         public async Task<IActionResult> UpdateCurvePoint(int id, [FromBody] CurvePointModel curvePointModel)
@@ -120,6 +123,7 @@ namespace P7CreateRestApi.Controllers
         /// </summary>
         /// <param name="id">The ID of the CurvePoint to delete</param>
         /// <returns>No content if successful</returns>
+        [Authorize(policy: "Admin")]
         [HttpDelete]
         [Route("{id}")]
         public async Task<IActionResult> DeleteCurvePoint(int id)

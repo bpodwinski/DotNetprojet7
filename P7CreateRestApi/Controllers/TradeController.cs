@@ -3,6 +3,7 @@ using P7CreateRestApi.DTOs;
 using P7CreateRestApi.Models;
 using P7CreateRestApi.Services;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Authorization;
 
 namespace P7CreateRestApi.Controllers
 {
@@ -22,6 +23,7 @@ namespace P7CreateRestApi.Controllers
         /// <summary>
         /// Retrieves all Trade items.
         /// </summary>
+        [Authorize(policy: "User")]
         [HttpGet]
         public async Task<IActionResult> List()
         {
@@ -41,6 +43,7 @@ namespace P7CreateRestApi.Controllers
         /// <summary>
         /// Retrieves a specific Trade by ID.
         /// </summary>
+        [Authorize(policy: "User")]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
@@ -65,6 +68,7 @@ namespace P7CreateRestApi.Controllers
         /// <summary>
         /// Creates a new Trade.
         /// </summary>
+        [Authorize(policy: "Admin")]
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] TradeModel model)
         {
@@ -91,6 +95,7 @@ namespace P7CreateRestApi.Controllers
         /// <summary>
         /// Updates an existing Trade.
         /// </summary>
+        [Authorize(policy: "Admin")]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateById(int id, [FromBody] TradeModel model)
         {
@@ -115,6 +120,7 @@ namespace P7CreateRestApi.Controllers
         /// <summary>
         /// Deletes a specific Trade by ID.
         /// </summary>
+        [Authorize(policy: "Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteById(int id)
         {

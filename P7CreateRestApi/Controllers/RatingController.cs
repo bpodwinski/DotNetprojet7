@@ -1,7 +1,7 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using P7CreateRestApi.Models;
 using P7CreateRestApi.Services;
-using Microsoft.Extensions.Logging;
 
 namespace P7CreateRestApi.Controllers
 {
@@ -22,6 +22,7 @@ namespace P7CreateRestApi.Controllers
         /// Retrieves all Rating items.
         /// </summary>
         /// <returns>A list of RatingDTOs</returns>
+        [Authorize(policy: "User")]
         [HttpGet]
         public async Task<IActionResult> List()
         {
@@ -43,6 +44,7 @@ namespace P7CreateRestApi.Controllers
         /// </summary>
         /// <param name="model">The Rating model to create</param>
         /// <returns>The created RatingDTO</returns>
+        [Authorize(policy: "Admin")]
         [HttpPost]
         public async Task<IActionResult> AddRating([FromBody] RatingModel model)
         {
@@ -64,6 +66,7 @@ namespace P7CreateRestApi.Controllers
         /// </summary>
         /// <param name="id">The ID of the Rating to retrieve</param>
         /// <returns>The RatingDTO</returns>
+        [Authorize(policy: "User")]
         [HttpGet]
         [Route("{id}")]
         public async Task<IActionResult> GetById(int id)
@@ -92,6 +95,7 @@ namespace P7CreateRestApi.Controllers
         /// <param name="id">The ID of the Rating to update</param>
         /// <param name="model">The Rating model with updated values</param>
         /// <returns>The updated RatingDTO</returns>
+        [Authorize(policy: "Admin")]
         [HttpPut]
         [Route("{id}")]
         public async Task<IActionResult> UpdateRating(int id, [FromBody] RatingModel model)
@@ -119,6 +123,7 @@ namespace P7CreateRestApi.Controllers
         /// </summary>
         /// <param name="id">The ID of the Rating to delete</param>
         /// <returns>No content if successful</returns>
+        [Authorize(policy: "Admin")]
         [HttpDelete]
         [Route("{id}")]
         public async Task<IActionResult> DeleteRating(int id)
