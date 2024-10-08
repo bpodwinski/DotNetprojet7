@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using P7CreateRestApi.DTOs;
 using P7CreateRestApi.Services;
-using Microsoft.Extensions.Logging;
 
 namespace P7CreateRestApi.Controllers
 {

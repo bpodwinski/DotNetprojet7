@@ -22,8 +22,12 @@ namespace P7CreateRestApi.Controllers
         /// Retrieves all Rating items.
         /// </summary>
         /// <returns>A list of RatingDTOs</returns>
+        /// <response code="200">Returns the list of RatingDTOs</response>
+        /// <response code="500">If an internal error occurs</response>
         [Authorize(policy: "User")]
         [HttpGet]
+        [ProducesResponseType(typeof(List<RatingModel>), 200)]
+        [ProducesResponseType(500)]
         public async Task<IActionResult> List()
         {
             try
@@ -44,8 +48,14 @@ namespace P7CreateRestApi.Controllers
         /// </summary>
         /// <param name="model">The Rating model to create</param>
         /// <returns>The created RatingDTO</returns>
+        /// <response code="201">Returns the newly created Rating</response>
+        /// <response code="400">If the model is invalid</response>
+        /// <response code="500">If an internal error occurs</response>
         [Authorize(policy: "Admin")]
         [HttpPost]
+        [ProducesResponseType(typeof(RatingModel), 201)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(500)]
         public async Task<IActionResult> AddRating([FromBody] RatingModel model)
         {
             try
@@ -66,9 +76,15 @@ namespace P7CreateRestApi.Controllers
         /// </summary>
         /// <param name="id">The ID of the Rating to retrieve</param>
         /// <returns>The RatingDTO</returns>
+        /// <response code="200">Returns the RatingDTO</response>
+        /// <response code="404">If the Rating with the specified ID is not found</response>
+        /// <response code="500">If an internal error occurs</response>
         [Authorize(policy: "User")]
         [HttpGet]
         [Route("{id}")]
+        [ProducesResponseType(typeof(RatingModel), 200)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(500)]
         public async Task<IActionResult> GetById(int id)
         {
             try
@@ -95,9 +111,15 @@ namespace P7CreateRestApi.Controllers
         /// <param name="id">The ID of the Rating to update</param>
         /// <param name="model">The Rating model with updated values</param>
         /// <returns>The updated RatingDTO</returns>
+        /// <response code="200">Returns the updated RatingDTO</response>
+        /// <response code="404">If the Rating with the specified ID is not found</response>
+        /// <response code="500">If an internal error occurs</response>
         [Authorize(policy: "Admin")]
         [HttpPut]
         [Route("{id}")]
+        [ProducesResponseType(typeof(RatingModel), 200)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(500)]
         public async Task<IActionResult> UpdateRating(int id, [FromBody] RatingModel model)
         {
             try
@@ -123,9 +145,15 @@ namespace P7CreateRestApi.Controllers
         /// </summary>
         /// <param name="id">The ID of the Rating to delete</param>
         /// <returns>No content if successful</returns>
+        /// <response code="204">If the Rating is successfully deleted</response>
+        /// <response code="404">If the Rating with the specified ID is not found</response>
+        /// <response code="500">If an internal error occurs</response>
         [Authorize(policy: "Admin")]
         [HttpDelete]
         [Route("{id}")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(500)]
         public async Task<IActionResult> DeleteRating(int id)
         {
             try

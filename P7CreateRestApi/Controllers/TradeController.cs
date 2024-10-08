@@ -1,9 +1,7 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using P7CreateRestApi.DTOs;
 using P7CreateRestApi.Models;
 using P7CreateRestApi.Services;
-using Microsoft.Extensions.Logging;
-using Microsoft.AspNetCore.Authorization;
 
 namespace P7CreateRestApi.Controllers
 {
@@ -23,8 +21,13 @@ namespace P7CreateRestApi.Controllers
         /// <summary>
         /// Retrieves all Trade items.
         /// </summary>
+        /// <returns>A list of TradeDTOs</returns>
+        /// <response code="200">Returns the list of TradeDTOs</response>
+        /// <response code="500">If an internal error occurs</response>
         [Authorize(policy: "User")]
         [HttpGet]
+        [ProducesResponseType(typeof(List<TradeModel>), 200)]
+        [ProducesResponseType(500)]
         public async Task<IActionResult> List()
         {
             try
@@ -43,8 +46,16 @@ namespace P7CreateRestApi.Controllers
         /// <summary>
         /// Retrieves a specific Trade by ID.
         /// </summary>
+        /// <param name="id">The ID of the Trade to retrieve</param>
+        /// <returns>The TradeDTO</returns>
+        /// <response code="200">Returns the TradeDTO</response>
+        /// <response code="404">If the Trade with the specified ID is not found</response>
+        /// <response code="500">If an internal error occurs</response>
         [Authorize(policy: "User")]
         [HttpGet("{id}")]
+        [ProducesResponseType(typeof(TradeModel), 200)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(500)]
         public async Task<IActionResult> GetById(int id)
         {
             try
@@ -68,8 +79,16 @@ namespace P7CreateRestApi.Controllers
         /// <summary>
         /// Creates a new Trade.
         /// </summary>
+        /// <param name="model">The Trade model to create</param>
+        /// <returns>The newly created TradeDTO</returns>
+        /// <response code="201">Returns the newly created TradeDTO</response>
+        /// <response code="400">If the model is invalid</response>
+        /// <response code="500">If an internal error occurs</response>
         [Authorize(policy: "Admin")]
         [HttpPost]
+        [ProducesResponseType(typeof(TradeModel), 201)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(500)]
         public async Task<IActionResult> Create([FromBody] TradeModel model)
         {
             try
@@ -95,8 +114,17 @@ namespace P7CreateRestApi.Controllers
         /// <summary>
         /// Updates an existing Trade.
         /// </summary>
+        /// <param name="id">The ID of the Trade to update</param>
+        /// <param name="model">The Trade model with updated values</param>
+        /// <returns>The updated TradeDTO</returns>
+        /// <response code="200">Returns the updated TradeDTO</response>
+        /// <response code="404">If the Trade with the specified ID is not found</response>
+        /// <response code="500">If an internal error occurs</response>
         [Authorize(policy: "Admin")]
         [HttpPut("{id}")]
+        [ProducesResponseType(typeof(TradeModel), 200)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(500)]
         public async Task<IActionResult> UpdateById(int id, [FromBody] TradeModel model)
         {
             try
@@ -120,8 +148,16 @@ namespace P7CreateRestApi.Controllers
         /// <summary>
         /// Deletes a specific Trade by ID.
         /// </summary>
+        /// <param name="id">The ID of the Trade to delete</param>
+        /// <returns>No content if successful</returns>
+        /// <response code="204">If the Trade is successfully deleted</response>
+        /// <response code="404">If the Trade with the specified ID is not found</response>
+        /// <response code="500">If an internal error occurs</response>
         [Authorize(policy: "Admin")]
         [HttpDelete("{id}")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(500)]
         public async Task<IActionResult> DeleteById(int id)
         {
             try

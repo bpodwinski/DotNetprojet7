@@ -1,7 +1,7 @@
-using Microsoft.AspNetCore.Mvc;
-using P7CreateRestApi.Models;
-using P7CreateRestApi.Services;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using P7CreateRestApi.DTOs;
+using P7CreateRestApi.Services;
 
 namespace P7CreateRestApi.Controllers
 {
@@ -22,8 +22,12 @@ namespace P7CreateRestApi.Controllers
         /// Retrieves all CurvePoints.
         /// </summary>
         /// <returns>A list of CurvePointDTOs</returns>
+        /// <response code="200">Returns the list of CurvePointDTOs</response>
+        /// <response code="500">If an internal error occurs</response>
         [Authorize(policy: "User")]
         [HttpGet]
+        [ProducesResponseType(typeof(List<CurvePointDTO>), 200)]
+        [ProducesResponseType(500)]
         public async Task<IActionResult> List()
         {
             try
@@ -42,16 +46,22 @@ namespace P7CreateRestApi.Controllers
         /// <summary>
         /// Adds a new CurvePoint.
         /// </summary>
-        /// <param name="curvePointModel">The CurvePoint model to create</param>
+        /// <param name="CurvePointDTO">The CurvePoint model to create</param>
         /// <returns>The created CurvePointDTO</returns>
+        /// <response code="201">Returns the newly created CurvePoint</response>
+        /// <response code="400">If the model is invalid</response>
+        /// <response code="500">If an internal error occurs</response>
         [Authorize(policy: "Admin")]
         [HttpPost]
-        public async Task<IActionResult> AddCurvePoint([FromBody] CurvePointModel curvePointModel)
+        [ProducesResponseType(typeof(CurvePointDTO), 201)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(500)]
+        public async Task<IActionResult> AddCurvePoint([FromBody] CurvePointDTO CurvePointDTO)
         {
             try
             {
                 _logger.LogInformation("Adding a new CurvePoint.");
-                var createdCurvePoint = await _curvePointService.CreateAsync(curvePointModel);
+                var createdCurvePoint = await _curvePointService.CreateAsync(CurvePointDTO);
                 return CreatedAtAction(nameof(GetById), new { id = createdCurvePoint.Id }, createdCurvePoint);
             }
             catch (Exception ex)
@@ -66,9 +76,15 @@ namespace P7CreateRestApi.Controllers
         /// </summary>
         /// <param name="id">The ID of the CurvePoint to retrieve</param>
         /// <returns>The CurvePointDTO</returns>
+        /// <response code="200">Returns the CurvePointDTO</response>
+        /// <response code="404">If the CurvePoint with the specified ID is not found</response>
+        /// <response code="500">If an internal error occurs</response>
         [Authorize(policy: "User")]
         [HttpGet]
         [Route("{id}")]
+        [ProducesResponseType(typeof(CurvePointDTO), 200)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(500)]
         public async Task<IActionResult> GetById(int id)
         {
             try
@@ -93,17 +109,23 @@ namespace P7CreateRestApi.Controllers
         /// Updates an existing CurvePoint.
         /// </summary>
         /// <param name="id">The ID of the CurvePoint to update</param>
-        /// <param name="curvePointModel">The CurvePoint model with updated values</param>
+        /// <param name="CurvePointDTO">The CurvePoint model with updated values</param>
         /// <returns>The updated CurvePointDTO</returns>
+        /// <response code="200">Returns the updated CurvePointDTO</response>
+        /// <response code="404">If the CurvePoint with the specified ID is not found</response>
+        /// <response code="500">If an internal error occurs</response>
         [Authorize(policy: "Admin")]
         [HttpPut]
         [Route("{id}")]
-        public async Task<IActionResult> UpdateCurvePoint(int id, [FromBody] CurvePointModel curvePointModel)
+        [ProducesResponseType(typeof(CurvePointDTO), 200)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(500)]
+        public async Task<IActionResult> UpdateCurvePoint(int id, [FromBody] CurvePointDTO CurvePointDTO)
         {
             try
             {
                 _logger.LogInformation("Updating CurvePoint with ID {Id}.", id);
-                var updatedCurvePoint = await _curvePointService.UpdateByIdAsync(id, curvePointModel);
+                var updatedCurvePoint = await _curvePointService.UpdateByIdAsync(id, CurvePointDTO);
                 if (updatedCurvePoint is not null)
                 {
                     return Ok(updatedCurvePoint);
@@ -123,9 +145,15 @@ namespace P7CreateRestApi.Controllers
         /// </summary>
         /// <param name="id">The ID of the CurvePoint to delete</param>
         /// <returns>No content if successful</returns>
+        /// <response code="204">If the CurvePoint is successfully deleted</response>
+        /// <response code="404">If the CurvePoint with the specified ID is not found</response>
+        /// <response code="500">If an internal error occurs</response>
         [Authorize(policy: "Admin")]
         [HttpDelete]
         [Route("{id}")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(500)]
         public async Task<IActionResult> DeleteCurvePoint(int id)
         {
             try

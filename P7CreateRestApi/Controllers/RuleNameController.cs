@@ -22,8 +22,12 @@ namespace P7CreateRestApi.Controllers
         /// Retrieves all RuleName items.
         /// </summary>
         /// <returns>A list of RuleNameDTOs</returns>
+        /// <response code="200">Returns the list of RuleNameDTOs</response>
+        /// <response code="500">If an internal error occurs</response>
         [Authorize(policy: "User")]
         [HttpGet]
+        [ProducesResponseType(typeof(List<RuleNameModel>), 200)]
+        [ProducesResponseType(500)]
         public async Task<IActionResult> List()
         {
             try
@@ -44,8 +48,12 @@ namespace P7CreateRestApi.Controllers
         /// </summary>
         /// <param name="model">The RuleNameModel to create</param>
         /// <returns>The created RuleNameDTO</returns>
+        /// <response code="201">Returns the newly created RuleNameDTO</response>
+        /// <response code="500">If an internal error occurs</response>
         [Authorize(policy: "Admin")]
         [HttpPost]
+        [ProducesResponseType(typeof(RuleNameModel), 201)]
+        [ProducesResponseType(500)]
         public async Task<IActionResult> AddRuleName([FromBody] RuleNameModel model)
         {
             try
@@ -66,9 +74,15 @@ namespace P7CreateRestApi.Controllers
         /// </summary>
         /// <param name="id">The ID of the RuleName to retrieve</param>
         /// <returns>The RuleNameDTO</returns>
+        /// <response code="200">Returns the RuleNameDTO</response>
+        /// <response code="404">If the RuleName with the specified ID is not found</response>
+        /// <response code="500">If an internal error occurs</response>
         [Authorize(policy: "User")]
         [HttpGet]
         [Route("{id}")]
+        [ProducesResponseType(typeof(RuleNameModel), 200)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(500)]
         public async Task<IActionResult> GetById(int id)
         {
             try
@@ -95,9 +109,15 @@ namespace P7CreateRestApi.Controllers
         /// <param name="id">The ID of the RuleName to update</param>
         /// <param name="model">The RuleName model with updated values</param>
         /// <returns>The updated RuleNameDTO</returns>
+        /// <response code="200">Returns the updated RuleNameDTO</response>
+        /// <response code="404">If the RuleName with the specified ID is not found</response>
+        /// <response code="500">If an internal error occurs</response>
         [Authorize(policy: "Admin")]
         [HttpPut]
         [Route("{id}")]
+        [ProducesResponseType(typeof(RuleNameModel), 200)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(500)]
         public async Task<IActionResult> UpdateRuleName(int id, [FromBody] RuleNameModel model)
         {
             try
@@ -123,9 +143,15 @@ namespace P7CreateRestApi.Controllers
         /// </summary>
         /// <param name="id">The ID of the RuleName to delete</param>
         /// <returns>No content if successful</returns>
+        /// <response code="204">If the RuleName is successfully deleted</response>
+        /// <response code="404">If the RuleName with the specified ID is not found</response>
+        /// <response code="500">If an internal error occurs</response>
         [Authorize(policy: "Admin")]
         [HttpDelete]
         [Route("{id}")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(500)]
         public async Task<IActionResult> DeleteRuleName(int id)
         {
             try
