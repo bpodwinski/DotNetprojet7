@@ -28,7 +28,7 @@ namespace P7CreateRestApi.Controllers
         [HttpGet]
         [ProducesResponseType(typeof(List<RuleNameDTO>), 200)]
         [ProducesResponseType(500)]
-        public async Task<IActionResult> List()
+        public async Task<IActionResult> GetAll()
         {
             try
             {
@@ -54,8 +54,13 @@ namespace P7CreateRestApi.Controllers
         [HttpPost]
         [ProducesResponseType(typeof(RuleNameDTO), 201)]
         [ProducesResponseType(500)]
-        public async Task<IActionResult> AddRuleName([FromBody] RuleNameDTO dto)
+        public async Task<IActionResult> Create([FromBody] RuleNameDTO dto)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             try
             {
                 _logger.LogInformation("Adding a new RuleName.");
@@ -118,7 +123,7 @@ namespace P7CreateRestApi.Controllers
         [ProducesResponseType(typeof(RuleNameDTO), 200)]
         [ProducesResponseType(404)]
         [ProducesResponseType(500)]
-        public async Task<IActionResult> UpdateRuleName(int id, [FromBody] RuleNameDTO dto)
+        public async Task<IActionResult> Update(int id, [FromBody] RuleNameDTO dto)
         {
             try
             {
@@ -152,7 +157,7 @@ namespace P7CreateRestApi.Controllers
         [ProducesResponseType(204)]
         [ProducesResponseType(404)]
         [ProducesResponseType(500)]
-        public async Task<IActionResult> DeleteRuleName(int id)
+        public async Task<IActionResult> Delete(int id)
         {
             try
             {

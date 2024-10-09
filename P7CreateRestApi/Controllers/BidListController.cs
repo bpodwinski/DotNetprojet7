@@ -31,7 +31,7 @@ namespace P7CreateRestApi.Controllers
         [Authorize(policy: "User")]
         [ProducesResponseType(typeof(List<BidListDTO>), 200)]
         [ProducesResponseType(500)]
-        public async Task<IActionResult> List()
+        public async Task<IActionResult> GetAll()
         {
             try
             {
@@ -60,7 +60,7 @@ namespace P7CreateRestApi.Controllers
         [ProducesResponseType(typeof(BidListDTO), 200)]
         [ProducesResponseType(404)]
         [ProducesResponseType(500)]
-        public async Task<IActionResult> Get([FromRoute] int id)
+        public async Task<IActionResult> GetById([FromRoute] int id)
         {
             try
             {
@@ -95,7 +95,7 @@ namespace P7CreateRestApi.Controllers
         [ProducesResponseType(typeof(BidListDTO), 201)]
         [ProducesResponseType(400)]
         [ProducesResponseType(500)]
-        public async Task<IActionResult> AddBidList([FromBody] BidListDTO dto)
+        public async Task<IActionResult> Create([FromBody] BidListDTO dto)
         {
             if (!ModelState.IsValid)
             {
@@ -107,7 +107,7 @@ namespace P7CreateRestApi.Controllers
             {
                 _logger.LogInformation("Creating a new BidList item.");
                 var createdBidList = await _bidListService.Create(dto);
-                return CreatedAtAction(nameof(Get), new { id = createdBidList.BidListId }, createdBidList);
+                return CreatedAtAction(nameof(GetById), new { id = createdBidList.BidListId }, createdBidList);
             }
             catch (Exception ex)
             {
@@ -131,7 +131,7 @@ namespace P7CreateRestApi.Controllers
         [ProducesResponseType(typeof(BidListDTO), 200)]
         [ProducesResponseType(404)]
         [ProducesResponseType(500)]
-        public async Task<IActionResult> UpdateById([FromRoute] int id, [FromBody] BidListDTO dto)
+        public async Task<IActionResult> Update([FromRoute] int id, [FromBody] BidListDTO dto)
         {
             try
             {
@@ -164,7 +164,7 @@ namespace P7CreateRestApi.Controllers
         [ProducesResponseType(204)]
         [ProducesResponseType(404)]
         [ProducesResponseType(500)]
-        public async Task<IActionResult> DeleteById([FromRoute] int id)
+        public async Task<IActionResult> Delete([FromRoute] int id)
         {
             try
             {

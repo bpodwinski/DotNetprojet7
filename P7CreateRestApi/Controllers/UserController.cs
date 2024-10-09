@@ -23,7 +23,7 @@ namespace P7CreateRestApi.Controllers
         /// </summary>
         [HttpGet]
         [Authorize(policy: "Admin")]
-        public async Task<IActionResult> List()
+        public async Task<IActionResult> GetAll()
         {
             try
             {
@@ -43,7 +43,7 @@ namespace P7CreateRestApi.Controllers
         /// </summary>
         [HttpPost]
         [Authorize(policy: "Admin")]
-        public async Task<IActionResult> AddUser([FromBody] UserDTO dto)
+        public async Task<IActionResult> Create([FromBody] UserDTO dto)
         {
             if (!ModelState.IsValid)
             {
@@ -100,7 +100,7 @@ namespace P7CreateRestApi.Controllers
         /// </summary>
         [HttpPut("{id}")]
         [Authorize(policy: "Admin")]
-        public async Task<IActionResult> UpdateUser(int id, [FromBody] UserDTO dto)
+        public async Task<IActionResult> Update(int id, [FromBody] UserDTO dto)
         {
             if (!ModelState.IsValid)
             {
@@ -131,7 +131,7 @@ namespace P7CreateRestApi.Controllers
         /// </summary>
         [HttpDelete("{id}")]
         [Authorize(policy: "Admin")]
-        public async Task<IActionResult> DeleteUser(int id)
+        public async Task<IActionResult> Delete(int id)
         {
             try
             {

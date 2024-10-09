@@ -91,6 +91,11 @@ namespace P7CreateRestApi.Controllers
         [ProducesResponseType(500)]
         public async Task<IActionResult> Create([FromBody] TradeDTO dto)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             try
             {
                 _logger.LogInformation("Creating a new trade.");

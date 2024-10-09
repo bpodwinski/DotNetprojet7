@@ -28,7 +28,7 @@ namespace P7CreateRestApi.Controllers
         [HttpGet]
         [ProducesResponseType(typeof(List<RatingDTO>), 200)]
         [ProducesResponseType(500)]
-        public async Task<IActionResult> List()
+        public async Task<IActionResult> GetAll()
         {
             try
             {
@@ -58,6 +58,12 @@ namespace P7CreateRestApi.Controllers
         [ProducesResponseType(500)]
         public async Task<IActionResult> Create([FromBody] RatingDTO dto)
         {
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             try
             {
                 _logger.LogInformation("Adding a new Rating.");
@@ -120,7 +126,7 @@ namespace P7CreateRestApi.Controllers
         [ProducesResponseType(typeof(RatingDTO), 200)]
         [ProducesResponseType(404)]
         [ProducesResponseType(500)]
-        public async Task<IActionResult> UpdateRating(int id, [FromBody] RatingDTO dto)
+        public async Task<IActionResult> Update(int id, [FromBody] RatingDTO dto)
         {
             try
             {
@@ -154,7 +160,7 @@ namespace P7CreateRestApi.Controllers
         [ProducesResponseType(204)]
         [ProducesResponseType(404)]
         [ProducesResponseType(500)]
-        public async Task<IActionResult> DeleteRating(int id)
+        public async Task<IActionResult> Delete(int id)
         {
             try
             {
