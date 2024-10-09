@@ -16,19 +16,19 @@ namespace P7CreateRestApi.DTOs
         /// Gets or sets Moody's rating for the entity.
         /// </summary>
         [Required(ErrorMessage = "The MoodysRating field is required.")]
-        public string MoodysRating { get; set; }
+        public string MoodysRating { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets Standard and Poor's rating for the entity.
         /// </summary>
         [Required(ErrorMessage = "The SandPRating field is required.")]
-        public string SandPRating { get; set; }
+        public string SandPRating { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets Fitch's rating for the entity.
         /// </summary>
         [Required(ErrorMessage = "The FitchRating field is required.")]
-        public string FitchRating { get; set; }
+        public string FitchRating { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the order number of the rating.
