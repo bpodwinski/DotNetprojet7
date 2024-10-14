@@ -8,7 +8,7 @@ Rendez votre back-end .NET plus flexible avec une API REST
 1. Cloner le projet 
 2. Modifier le fichier appsettings.json
 	```
-		"ConnectionStrings": {
+	"ConnectionStrings": {
 	  "DefaultConnection": "Server=.;Database=P7Create;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True"
 	},
 	```
