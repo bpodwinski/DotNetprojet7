@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Swashbuckle.AspNetCore.Annotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace P7CreateRestApi.DTOs
 {
@@ -10,6 +11,7 @@ namespace P7CreateRestApi.DTOs
         /// <summary>
         /// Gets or sets the unique identifier for the RuleName.
         /// </summary>
+        [SwaggerSchema(ReadOnly = true)]
         public int Id { get; set; }
 
         /// <summary>

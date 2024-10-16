@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using P7CreateRestApi.DTOs;
 using P7CreateRestApi.Services;
+using System.Security.Claims;
 
 namespace P7CreateRestApi.Controllers
 {
@@ -135,6 +136,14 @@ namespace P7CreateRestApi.Controllers
         {
             try
             {
+                var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value!);
+
+                if (id == currentUserId)
+                {
+                    _logger.LogWarning("User with ID {Id} attempted to delete their own account.", currentUserId);
+                    return StatusCode(503, "You cannot delete your own account.");
+                }
+
                 _logger.LogInformation("Deleting user with ID {Id}.", id);
                 var user = await _userService.DeleteById(id);
                 if (user is not null)

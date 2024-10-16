@@ -27,6 +27,8 @@ builder.Services.AddEndpointsApiExplorer();
 // Configure Swagger/OpenAPI
 builder.Services.AddSwaggerGen(options =>
 {
+    options.EnableAnnotations();
+
     options.SwaggerDoc("v1", new OpenApiInfo
     {
         Title = "P7CreateRestApi",

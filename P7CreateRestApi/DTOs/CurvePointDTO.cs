@@ -1,3 +1,4 @@
+using Swashbuckle.AspNetCore.Annotations;
 using System.ComponentModel.DataAnnotations;
 
 namespace P7CreateRestApi.DTOs
@@ -10,6 +11,7 @@ namespace P7CreateRestApi.DTOs
         /// <summary>
         /// Gets or sets the unique ID of the curve point.
         /// </summary>
+        [SwaggerSchema(ReadOnly = true)]
         public int Id { get; set; }
 
         /// <summary>
