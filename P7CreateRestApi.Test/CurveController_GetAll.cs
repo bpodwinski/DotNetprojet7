@@ -5,42 +5,45 @@ using P7CreateRestApi.DTOs;
 using P7CreateRestApi.Services;
 using Microsoft.Extensions.Logging;
 
-/// <summary>
-/// Unit test for GetAll method in CurveController.
-/// </summary>
-public class CurveControllerGetAllTest
+namespace P7CreateRestApi.Test
 {
-    private readonly CurveController _controller;
-    private readonly Mock<ICurvePointService> _mockService;
-    private readonly Mock<ILogger<CurveController>> _mockLogger;
-
-    public CurveControllerGetAllTest()
-    {
-        _mockService = new Mock<ICurvePointService>();
-        _mockLogger = new Mock<ILogger<CurveController>>();
-        _controller = new CurveController(_mockService.Object, _mockLogger.Object);
-    }
-
     /// <summary>
-    /// Tests if GetAll returns OkResult with a list of CurvePoints.
+    /// Unit test for GetAll method in CurveController.
     /// </summary>
-    [Fact]
-    public async Task GetAll_ReturnsOkResult_WithListOfCurvePoints()
+    public class CurveControllerGetAllTest
     {
-        // Arrange
-        var curvePoints = new List<CurvePointDTO>
+        private readonly CurveController _controller;
+        private readonly Mock<ICurvePointService> _mockService;
+        private readonly Mock<ILogger<CurveController>> _mockLogger;
+
+        public CurveControllerGetAllTest()
+        {
+            _mockService = new Mock<ICurvePointService>();
+            _mockLogger = new Mock<ILogger<CurveController>>();
+            _controller = new CurveController(_mockService.Object, _mockLogger.Object);
+        }
+
+        /// <summary>
+        /// Tests if GetAll returns OkResult with a list of CurvePoints.
+        /// </summary>
+        [Fact]
+        public async Task GetAll_ReturnsOkResult_WithListOfCurvePoints()
+        {
+            // Arrange
+            var curvePoints = new List<CurvePointDTO>
         {
             new() { Id = 1, CurveId = 1 },
             new() { Id = 2, CurveId = 2 }
         };
-        _mockService.Setup(service => service.GetAll()).ReturnsAsync(curvePoints);
+            _mockService.Setup(service => service.GetAll()).ReturnsAsync(curvePoints);
 
-        // Act
-        var result = await _controller.GetAll();
+            // Act
+            var result = await _controller.GetAll();
 
-        // Assert
-        var okResult = Assert.IsType<OkObjectResult>(result);
-        var returnValue = Assert.IsType<List<CurvePointDTO>>(okResult.Value);
-        Assert.Equal(2, returnValue.Count);
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var returnValue = Assert.IsType<List<CurvePointDTO>>(okResult.Value);
+            Assert.Equal(2, returnValue.Count);
+        }
     }
 }

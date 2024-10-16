@@ -5,56 +5,59 @@ using P7CreateRestApi.DTOs;
 using P7CreateRestApi.Services;
 using Microsoft.Extensions.Logging;
 
-public class TradeControllerCreateTest
+namespace P7CreateRestApi.Test
 {
-    private readonly Mock<ITradeService> _mockTradeService;
-    private readonly Mock<ILogger<TradeController>> _mockLogger;
-    private readonly TradeController _controller;
-
-    public TradeControllerCreateTest()
+    public class TradeControllerCreateTest
     {
-        _mockTradeService = new Mock<ITradeService>();
-        _mockLogger = new Mock<ILogger<TradeController>>();
-        _controller = new TradeController(_mockTradeService.Object, _mockLogger.Object);
-    }
+        private readonly Mock<ITradeService> _mockTradeService;
+        private readonly Mock<ILogger<TradeController>> _mockLogger;
+        private readonly TradeController _controller;
 
-    [Fact]
-    public async Task Create_ValidTrade_ReturnsCreatedAtAction()
-    {
-        // Arrange
-        var newTrade = new TradeDTO
+        public TradeControllerCreateTest()
         {
-            TradeId = 1,
-            Account = "Account1",
-            AccountType = "Type1",
-            BuyQuantity = 100,
-            SellQuantity = 50,
-            BuyPrice = 10.5,
-            SellPrice = 12.0,
-            TradeDate = DateTime.UtcNow,
-            TradeSecurity = "Sec1",
-            TradeStatus = "Open",
-            Trader = "Trader1",
-            Benchmark = "Benchmark1",
-            Book = "Book1",
-            CreationName = "Creator1",
-            CreationDate = DateTime.UtcNow,
-            RevisionName = "Revisor1",
-            RevisionDate = DateTime.UtcNow,
-            DealName = "Deal1",
-            DealType = "TypeA",
-            SourceListId = "Source1",
-            Side = "Buy"
-        };
+            _mockTradeService = new Mock<ITradeService>();
+            _mockLogger = new Mock<ILogger<TradeController>>();
+            _controller = new TradeController(_mockTradeService.Object, _mockLogger.Object);
+        }
 
-        _mockTradeService.Setup(service => service.Create(It.IsAny<TradeDTO>())).ReturnsAsync(newTrade);
+        [Fact]
+        public async Task Create_ValidTrade_ReturnsCreatedAtAction()
+        {
+            // Arrange
+            var newTrade = new TradeDTO
+            {
+                TradeId = 1,
+                Account = "Account1",
+                AccountType = "Type1",
+                BuyQuantity = 100,
+                SellQuantity = 50,
+                BuyPrice = 10.5,
+                SellPrice = 12.0,
+                TradeDate = DateTime.UtcNow,
+                TradeSecurity = "Sec1",
+                TradeStatus = "Open",
+                Trader = "Trader1",
+                Benchmark = "Benchmark1",
+                Book = "Book1",
+                CreationName = "Creator1",
+                CreationDate = DateTime.UtcNow,
+                RevisionName = "Revisor1",
+                RevisionDate = DateTime.UtcNow,
+                DealName = "Deal1",
+                DealType = "TypeA",
+                SourceListId = "Source1",
+                Side = "Buy"
+            };
 
-        // Act
-        var result = await _controller.Create(newTrade);
+            _mockTradeService.Setup(service => service.Create(It.IsAny<TradeDTO>())).ReturnsAsync(newTrade);
 
-        // Assert
-        var createdAtActionResult = Assert.IsType<CreatedAtActionResult>(result);
-        var returnTrade = Assert.IsType<TradeDTO>(createdAtActionResult.Value);
-        Assert.Equal(newTrade.TradeId, returnTrade.TradeId);
+            // Act
+            var result = await _controller.Create(newTrade);
+
+            // Assert
+            var createdAtActionResult = Assert.IsType<CreatedAtActionResult>(result);
+            var returnTrade = Assert.IsType<TradeDTO>(createdAtActionResult.Value);
+            Assert.Equal(newTrade.TradeId, returnTrade.TradeId);
+        }
     }
 }

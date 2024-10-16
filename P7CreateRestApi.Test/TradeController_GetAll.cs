@@ -5,24 +5,26 @@ using P7CreateRestApi.DTOs;
 using P7CreateRestApi.Services;
 using Microsoft.Extensions.Logging;
 
-public class TradeControllerGetAllTest
+namespace P7CreateRestApi.Test
 {
-    private readonly Mock<ITradeService> _mockTradeService;
-    private readonly Mock<ILogger<TradeController>> _mockLogger;
-    private readonly TradeController _controller;
-
-    public TradeControllerGetAllTest()
+    public class TradeControllerGetAllTest
     {
-        _mockTradeService = new Mock<ITradeService>();
-        _mockLogger = new Mock<ILogger<TradeController>>();
-        _controller = new TradeController(_mockTradeService.Object, _mockLogger.Object);
-    }
+        private readonly Mock<ITradeService> _mockTradeService;
+        private readonly Mock<ILogger<TradeController>> _mockLogger;
+        private readonly TradeController _controller;
 
-    [Fact]
-    public async Task GetAll_ReturnsOkResult_WithListOfTrades()
-    {
-        // Arrange
-        var mockTrades = new List<TradeDTO>
+        public TradeControllerGetAllTest()
+        {
+            _mockTradeService = new Mock<ITradeService>();
+            _mockLogger = new Mock<ILogger<TradeController>>();
+            _controller = new TradeController(_mockTradeService.Object, _mockLogger.Object);
+        }
+
+        [Fact]
+        public async Task GetAll_ReturnsOkResult_WithListOfTrades()
+        {
+            // Arrange
+            var mockTrades = new List<TradeDTO>
         {
             new TradeDTO
             {
@@ -74,14 +76,15 @@ public class TradeControllerGetAllTest
             }
         };
 
-        _mockTradeService.Setup(service => service.GetAll()).ReturnsAsync(mockTrades);
+            _mockTradeService.Setup(service => service.GetAll()).ReturnsAsync(mockTrades);
 
-        // Act
-        var result = await _controller.GetAll();
+            // Act
+            var result = await _controller.GetAll();
 
-        // Assert
-        var okResult = Assert.IsType<OkObjectResult>(result);
-        var returnTrades = Assert.IsType<List<TradeDTO>>(okResult.Value);
-        Assert.Equal(2, returnTrades.Count);
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var returnTrades = Assert.IsType<List<TradeDTO>>(okResult.Value);
+            Assert.Equal(2, returnTrades.Count);
+        }
     }
 }
