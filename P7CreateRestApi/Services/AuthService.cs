@@ -99,27 +99,31 @@ namespace P7CreateRestApi.Services
         }
 
         /// <summary>
-        /// Generates a new JWT token for the specified user.
+        /// Generates a new JWT token for the specified user and includes custom claims.
         /// </summary>
         /// <param name="user">The user for whom the JWT is being generated.</param>
+        /// <param name="additionalClaims">Additional claims to be included in the token.</param>
         /// <returns>A string representing the generated JWT token.</returns>
-        public string GenerateToken(User user)
+        public string GenerateToken(User user, IList<Claim> additionalClaims)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_config["Jwt:SecretKey"]!);
-
             var audience = _config["Jwt:Audience"];
             var issuer = _config["Jwt:Issuer"];
             var tokenExpiryInMinutes = int.TryParse(_config["Jwt:TokenExpiryInMinutes"], out var expiry) ? expiry : 15;
 
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Name, user.UserName),
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Role, user.Role)
+            };
+
+            claims.AddRange(additionalClaims);
+
             var tokenDescriptor = new SecurityTokenDescriptor
             {
-                Subject = new ClaimsIdentity(new[]
-                {
-            new Claim(ClaimTypes.Name, user.UserName),
-            new Claim(ClaimTypes.Role, user.Role),
-            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
-        }),
+                Subject = new ClaimsIdentity(claims),
                 Expires = DateTime.UtcNow.AddMinutes(tokenExpiryInMinutes),
                 Audience = audience,
                 Issuer = issuer,
@@ -129,7 +133,6 @@ namespace P7CreateRestApi.Services
             var token = tokenHandler.CreateToken(tokenDescriptor);
             return tokenHandler.WriteToken(token);
         }
-
 
         /// <summary>
         /// Extracts the principal from an expired JWT token.

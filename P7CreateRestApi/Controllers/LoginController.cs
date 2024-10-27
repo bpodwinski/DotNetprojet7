@@ -61,8 +61,8 @@ namespace P7CreateRestApi.Controllers
                     return Unauthorized(new { message = "Invalid username or password" });
                 }
 
-                var token = _authService.GenerateToken(user);
-
+                var userClaims = await _userManager.GetClaimsAsync(user);
+                var token = _authService.GenerateToken(user, userClaims);
                 var refreshToken = _authService.GenerateRefreshToken();
                 await _authService.AddRefreshToken(user, refreshToken);
 
@@ -102,7 +102,8 @@ namespace P7CreateRestApi.Controllers
                 return Unauthorized(new { message = "Invalid or expired refresh token" });
             }
 
-            var newJwtToken = _authService.GenerateToken(user);
+            var userClaims = await _userManager.GetClaimsAsync(user);
+            var newJwtToken = _authService.GenerateToken(user, userClaims);
             var newRefreshToken = _authService.GenerateRefreshToken();
 
             await _authService.AddRefreshToken(user, newRefreshToken);

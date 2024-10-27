@@ -42,11 +42,12 @@ namespace P7CreateRestApi.Services
         string GenerateRefreshToken();
 
         /// <summary>
-        /// Generates a new JWT token for the specified user.
+        /// Generates a new JWT token for the specified user and includes custom claims.
         /// </summary>
         /// <param name="user">The user for whom the JWT is being generated.</param>
+        /// <param name="additionalClaims">Additional claims to be included in the token.</param>
         /// <returns>A string representing the generated JWT token.</returns>
-        string GenerateToken(User user);
+        string GenerateToken(User user, IList<Claim> additionalClaims);
 
         /// <summary>
         /// Extracts the principal from an expired JWT token.
