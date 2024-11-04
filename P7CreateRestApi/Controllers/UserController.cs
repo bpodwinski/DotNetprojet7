@@ -74,8 +74,12 @@ namespace P7CreateRestApi.Controllers
         /// <summary>
         /// Retrieves a user by ID.
         /// </summary>
-        [HttpGet("{id}")]
+        [HttpGet]
+        [Route("{id}")]
         [Authorize(policy: "Admin")]
+        [ProducesResponseType(typeof(BidListDTO), 200)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(500)]
         public IActionResult GetById(int id)
         {
             try
