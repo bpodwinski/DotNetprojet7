@@ -107,9 +107,13 @@ namespace P7CreateRestApi.Controllers
         /// <summary>
         /// Updates a user's details by ID.
         /// </summary>
+        /// <param name="id">The ID of the user to update.</param>
+        /// <param name="dto">The updated user data.</param>
+        /// <returns>A response indicating success or failure of the update.</returns>
         [HttpPut("{id}")]
-        [Authorize(policy: "Admin")]
+        [Authorize(policy: "User")]
         [ProducesResponseType(typeof(UserDTO), 200)]
+        [ProducesResponseType(400)]
         [ProducesResponseType(404)]
         [ProducesResponseType(500)]
         public async Task<IActionResult> Update(int id, [FromBody] UserDTO dto)
@@ -123,27 +127,44 @@ namespace P7CreateRestApi.Controllers
             try
             {
                 _logger.LogInformation("Updating user with ID {Id}.", id);
-                var user = await _userService.Update(id, dto);
+
+                var currentUser = User;
+                var user = await _userService.Update(id, dto, currentUser);
+
                 if (user is not null)
                 {
+                    _logger.LogInformation("User with ID {Id} updated successfully.", id);
                     return Ok(user);
                 }
+
+                // Si l'utilisateur n'a pas été trouvé
                 _logger.LogWarning("User with ID {Id} not found for update.", id);
                 return NotFound($"User with ID {id} not found.");
             }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogWarning(ex, "Unauthorized access attempt to update user with ID {Id}.", id);
+                return StatusCode(403, "You do not have permission to perform this action.");
+            }
+            catch (ArgumentException ex)
+            {
+                _logger.LogWarning(ex, "Invalid argument provided for updating user with ID {Id}.", id);
+                return BadRequest(ex.Message);
+            }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An error occurred while updating user with ID {Id}.", id);
+                _logger.LogError(ex, "An internal error occurred while updating user with ID {Id}.", id);
                 return StatusCode(500, "An internal error occurred.");
             }
         }
 
         /// <summary>
-        /// Deletes a user by ID.
+        /// Deletes a user by ID. Admins can delete any user, but regular users can only delete their own account.
         /// </summary>
         [HttpDelete("{id}")]
-        [Authorize(policy: "Admin")]
+        [Authorize(Policy = "User")]
         [ProducesResponseType(204)]
+        [ProducesResponseType(403)]
         [ProducesResponseType(404)]
         [ProducesResponseType(500)]
         public async Task<IActionResult> Delete(int id)
@@ -151,21 +172,38 @@ namespace P7CreateRestApi.Controllers
             try
             {
                 var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value!);
+                var isAdmin = User.IsInRole("Admin");
 
-                if (id == currentUserId)
+                // Check if the user is allowed to delete the target user
+                if (!isAdmin && id != currentUserId)
                 {
-                    _logger.LogWarning("User with ID {Id} attempted to delete their own account.", currentUserId);
-                    return StatusCode(503, "You cannot delete your own account.");
+                    _logger.LogWarning("User with ID {UserId} attempted to delete another user's account with ID {TargetId}.", currentUserId, id);
+                    return StatusCode(403, new { message = "You are not authorized to delete other users' accounts." });
                 }
 
-                _logger.LogInformation("Deleting user with ID {Id}.", id);
-                var user = await _userService.DeleteById(id);
+                if (id == currentUserId && !isAdmin)
+                {
+                    _logger.LogInformation("User with ID {UserId} is deleting their own account.", currentUserId);
+                }
+                else
+                {
+                    _logger.LogInformation("Admin user with ID {AdminId} is deleting user with ID {UserId}.", currentUserId, id);
+                }
+
+                // Attempt to delete the user
+                var user = await _userService.DeleteById(id, User);
                 if (user is not null)
                 {
                     return NoContent();
                 }
+
                 _logger.LogWarning("User with ID {Id} not found for deletion.", id);
-                return NotFound($"User with ID {id} not found.");
+                return NotFound(new { message = $"User with ID {id} not found." });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogWarning(ex, "Unauthorized deletion attempt by user ID {UserId}.", id);
+                return StatusCode(403, new { message = ex.Message });
             }
             catch (Exception ex)
             {

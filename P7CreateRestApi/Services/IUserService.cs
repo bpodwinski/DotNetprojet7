@@ -1,4 +1,5 @@
 ﻿using P7CreateRestApi.DTOs;
+using System.Security.Claims;
 
 namespace P7CreateRestApi.Services
 {
@@ -18,8 +19,9 @@ namespace P7CreateRestApi.Services
         /// Asynchronously deletes a User by its ID.
         /// </summary>
         /// <param name="id">The ID of the user to delete.</param>
+        /// <param name="currentUser">The currently authenticated user performing delete operation.</param>
         /// <returns>The deleted UserDTO, or null if the user was not found.</returns>
-        Task<UserDTO?> DeleteById(int id);
+        Task<UserDTO?> DeleteById(int id, ClaimsPrincipal currentUser);
 
         /// <summary>
         /// Asynchronously retrieves a User by its ID.
@@ -39,7 +41,8 @@ namespace P7CreateRestApi.Services
         /// </summary>
         /// <param name="id">The ID of the user to update.</param>
         /// <param name="dto">The UserDTO containing the updated details of the user.</param>
+        /// <param name="currentUser">The currently authenticated user performing update operation.</param>
         /// <returns>The updated UserDTO, or null if the user was not found.</returns>
-        Task<UserDTO?> Update(int id, UserDTO dto);
+        Task<UserDTO?> Update(int id, UserDTO dto, ClaimsPrincipal currentUser);
     }
 }
