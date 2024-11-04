@@ -24,6 +24,8 @@ namespace P7CreateRestApi.Controllers
         /// </summary>
         [HttpGet]
         [Authorize(policy: "Admin")]
+        [ProducesResponseType(typeof(UserDTO), 200)]
+        [ProducesResponseType(500)]
         public async Task<IActionResult> GetAll()
         {
             try
@@ -44,6 +46,8 @@ namespace P7CreateRestApi.Controllers
         /// </summary>
         [HttpPost]
         [Authorize(policy: "Admin")]
+        [ProducesResponseType(typeof(UserDTO), 201)]
+        [ProducesResponseType(500)]
         public async Task<IActionResult> Create([FromBody] UserDTO dto)
         {
             if (!ModelState.IsValid)
@@ -77,15 +81,15 @@ namespace P7CreateRestApi.Controllers
         [HttpGet]
         [Route("{id}")]
         [Authorize(policy: "Admin")]
-        [ProducesResponseType(typeof(BidListDTO), 200)]
+        [ProducesResponseType(typeof(UserDTO), 200)]
         [ProducesResponseType(404)]
         [ProducesResponseType(500)]
-        public IActionResult GetById(int id)
+        public async Task<IActionResult> GetById(int id)
         {
             try
             {
                 _logger.LogInformation("Fetching user with ID {Id}.", id);
-                var user = _userService.GetById(id);
+                var user = await _userService.GetById(id);
                 if (user is not null)
                 {
                     return Ok(user);
@@ -105,6 +109,9 @@ namespace P7CreateRestApi.Controllers
         /// </summary>
         [HttpPut("{id}")]
         [Authorize(policy: "Admin")]
+        [ProducesResponseType(typeof(UserDTO), 200)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(500)]
         public async Task<IActionResult> Update(int id, [FromBody] UserDTO dto)
         {
             if (!ModelState.IsValid)
@@ -136,6 +143,9 @@ namespace P7CreateRestApi.Controllers
         /// </summary>
         [HttpDelete("{id}")]
         [Authorize(policy: "Admin")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(500)]
         public async Task<IActionResult> Delete(int id)
         {
             try
