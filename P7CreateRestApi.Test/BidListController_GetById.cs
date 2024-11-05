@@ -10,13 +10,13 @@ namespace P7CreateRestApi.Test
     /// <summary>
     /// Unit test for GetById method in BidListController.
     /// </summary>
-    public class BidListControllerGetTest
+    public class BidListControllerGetByIdTest
     {
         private readonly Mock<IBidListService> _mockBidListService;
         private readonly Mock<ILogger<BidListController>> _mockLogger;
         private readonly BidListController _controller;
 
-        public BidListControllerGetTest()
+        public BidListControllerGetByIdTest()
         {
             _mockBidListService = new Mock<IBidListService>();
             _mockLogger = new Mock<ILogger<BidListController>>();
@@ -80,6 +80,25 @@ namespace P7CreateRestApi.Test
             // Assert
             var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
             Assert.Equal("BidList with ID 1 not found.", notFoundResult.Value);
+        }
+
+        /// <summary>
+        /// Tests if GetById returns 500 Internal Server Error when an exception occurs.
+        /// </summary>
+        [Fact]
+        public async Task GetById_ReturnsInternalServerError_WhenExceptionOccurs()
+        {
+            // Arrange
+            int bidListId = 1;
+            _mockBidListService.Setup(service => service.GetById(bidListId)).ThrowsAsync(new Exception("Internal error"));
+
+            // Act
+            var result = await _controller.GetById(bidListId);
+
+            // Assert
+            var objectResult = Assert.IsType<ObjectResult>(result);
+            Assert.Equal(500, objectResult.StatusCode);
+            Assert.Equal("An internal error occurred.", objectResult.Value);
         }
     }
 }

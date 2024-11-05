@@ -78,5 +78,23 @@ namespace P7CreateRestApi.Test
             var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
             Assert.Equal("BidList with ID 1 not found.", notFoundResult.Value);
         }
+
+        /// <summary>
+        /// Tests if Delete returns 500 Internal Server Error when an exception occurs.
+        /// </summary>
+        [Fact]
+        public async Task Delete_ReturnsInternalServerError_WhenExceptionOccurs()
+        {
+            // Arrange
+            _mockBidListService.Setup(service => service.DeleteById(1)).ThrowsAsync(new Exception("Internal error"));
+
+            // Act
+            var result = await _controller.Delete(1);
+
+            // Assert
+            var objectResult = Assert.IsType<ObjectResult>(result);
+            Assert.Equal(500, objectResult.StatusCode);
+            Assert.Equal("An internal error occurred.", objectResult.Value);
+        }
     }
 }

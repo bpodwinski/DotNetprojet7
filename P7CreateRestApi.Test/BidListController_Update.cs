@@ -97,5 +97,40 @@ namespace P7CreateRestApi.Test
             // Assert
             Assert.IsType<NotFoundObjectResult>(result);
         }
+
+        /// <summary>
+        /// Tests if Update returns 500 Internal Server Error when an exception occurs.
+        /// </summary>
+        [Fact]
+        public async Task Update_ReturnsInternalServerError_WhenExceptionOccurs()
+        {
+            // Arrange
+            int bidListId = 1;
+            var bidListDto = new BidListDTO {
+                Account = "TestAccount",
+                BidType = "TestBidType",
+                Benchmark = "TestBenchmark",
+                Commentary = "TestCommentary",
+                BidSecurity = "TestSecurity",
+                BidStatus = "Open",
+                Trader = "TestTrader",
+                Book = "TestBook",
+                CreationName = "TestCreator",
+                RevisionName = "TestRevisor",
+                DealName = "TestDeal",
+                DealType = "TestDealType",
+                SourceListId = "SL1",
+                Side = "Buy"
+            };
+            _mockService.Setup(service => service.Update(bidListId, bidListDto)).ThrowsAsync(new Exception("Internal error"));
+
+            // Act
+            var result = await _controller.Update(bidListId, bidListDto);
+
+            // Assert
+            var objectResult = Assert.IsType<ObjectResult>(result);
+            Assert.Equal(500, objectResult.StatusCode);
+            Assert.Equal("An internal error occurred.", objectResult.Value);
+        }
     }
 }

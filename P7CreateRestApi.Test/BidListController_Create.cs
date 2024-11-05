@@ -10,13 +10,13 @@ namespace P7CreateRestApi.Test
     /// <summary>
     /// Unit test for Create method in BidListController.
     /// </summary>
-    public class BidListControlleCreateTest
+    public class BidListControllerCreateTest
     {
         private readonly Mock<IBidListService> _mockBidListService;
         private readonly Mock<ILogger<BidListController>> _mockLogger;
         private readonly BidListController _controller;
 
-        public BidListControlleCreateTest()
+        public BidListControllerCreateTest()
         {
             _mockBidListService = new Mock<IBidListService>();
             _mockLogger = new Mock<ILogger<BidListController>>();
@@ -96,6 +96,42 @@ namespace P7CreateRestApi.Test
 
             // Assert
             Assert.IsType<BadRequestObjectResult>(result);
+        }
+
+        /// <summary>
+        /// Tests if Create returns 500 Internal Server Error when an exception is thrown in the service.
+        /// </summary>
+        [Fact]
+        public async Task Create_ReturnsInternalServerError_WhenExceptionThrown()
+        {
+            // Arrange
+            var newBidList = new BidListDTO
+            {
+                Account = "TestAccount",
+                BidType = "TestBidType",
+                Benchmark = "TestBenchmark",
+                Commentary = "TestCommentary",
+                BidSecurity = "TestSecurity",
+                BidStatus = "Open",
+                Trader = "TestTrader",
+                Book = "TestBook",
+                CreationName = "TestCreator",
+                RevisionName = "TestRevisor",
+                DealName = "TestDeal",
+                DealType = "TestDealType",
+                SourceListId = "SL1",
+                Side = "Buy"
+            };
+
+            _mockBidListService.Setup(service => service.Create(It.IsAny<BidListDTO>())).ThrowsAsync(new Exception("Database error"));
+
+            // Act
+            var result = await _controller.Create(newBidList);
+
+            // Assert
+            var serverErrorResult = Assert.IsType<ObjectResult>(result);
+            Assert.Equal(500, serverErrorResult.StatusCode);
+            Assert.Equal("An internal error occurred.", serverErrorResult.Value);
         }
     }
 }
