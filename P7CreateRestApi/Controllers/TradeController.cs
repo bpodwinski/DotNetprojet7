@@ -168,7 +168,7 @@ namespace P7CreateRestApi.Controllers
             try
             {
                 _logger.LogInformation("Deleting trade with ID {Id}.", id);
-                var deletedTrade = await _tradeService.Delete(id);
+                var deletedTrade = await _tradeService.DeleteById(id);
                 if (deletedTrade is null)
                 {
                     _logger.LogWarning("Trade with ID {Id} not found.", id);

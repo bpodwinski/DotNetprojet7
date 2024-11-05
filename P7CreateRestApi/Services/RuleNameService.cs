@@ -1,6 +1,7 @@
-﻿using P7CreateRestApi.Domain;
+﻿using Microsoft.EntityFrameworkCore;
+using P7CreateRestApi.Data;
+using P7CreateRestApi.Domain;
 using P7CreateRestApi.DTOs;
-using P7CreateRestApi.Models;
 using P7CreateRestApi.Repositories;
 
 namespace P7CreateRestApi.Services
@@ -8,10 +9,15 @@ namespace P7CreateRestApi.Services
     public class RuleNameService : IRuleNameService
     {
         private readonly IRuleNameRepository _ruleNameRepository;
+        private readonly LocalDbContext _dbContext;
 
-        public RuleNameService(IRuleNameRepository ruleNameRepository)
+        public RuleNameService(
+            IRuleNameRepository ruleNameRepository,
+            LocalDbContext dbContext
+        )
         {
             _ruleNameRepository = ruleNameRepository;
+            _dbContext = dbContext;
         }
 
         /// <summary>
@@ -21,18 +27,25 @@ namespace P7CreateRestApi.Services
         /// <returns>The created RuleNameDTO</returns>
         public async Task<RuleNameDTO?> Create(RuleNameDTO dto)
         {
-            var ruleName = new RuleName
+            try
             {
-                Name = dto.Name,
-                Description = dto.Description,
-                Json = dto.Json,
-                Template = dto.Template,
-                SqlStr = dto.SqlStr,
-                SqlPart = dto.SqlPart
-            };
+                var ruleName = new RuleName
+                {
+                    Name = dto.Name,
+                    Description = dto.Description,
+                    Json = dto.Json,
+                    Template = dto.Template,
+                    SqlStr = dto.SqlStr,
+                    SqlPart = dto.SqlPart
+                };
 
-            await _ruleNameRepository.Create(ruleName);
-            return ToDTO(ruleName);
+                await _ruleNameRepository.Create(ruleName);
+                return ToDTO(ruleName);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("An error occurred while creating a new RuleName.", ex);
+            }
         }
 
         /// <summary>
@@ -42,14 +55,23 @@ namespace P7CreateRestApi.Services
         /// <returns>The deleted RuleNameDTO, or null if not found</returns>
         public async Task<RuleNameDTO?> DeleteById(int id)
         {
-            var existingRuleName = await _ruleNameRepository.GetById(id);
-            if (existingRuleName == null)
+            try
             {
-                return null;
-            }
+                var existingRuleName = await _ruleNameRepository.GetById(id);
+                if (existingRuleName == null)
+                {
+                    return null;
+                }
 
-            var deletedRuleName = await _ruleNameRepository.DeleteById(id);
-            return deletedRuleName != null ? ToDTO(deletedRuleName) : null;
+                _dbContext.Entry(existingRuleName).State = EntityState.Detached;
+
+                var deletedRuleName = await _ruleNameRepository.DeleteById(id);
+                return deletedRuleName != null ? ToDTO(deletedRuleName) : null;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"An error occurred while deleting the RuleName with ID {id}.", ex);
+            }
         }
 
         /// <summary>
@@ -59,8 +81,15 @@ namespace P7CreateRestApi.Services
         /// <returns>The RuleNameDTO, or null if not found</returns>
         public async Task<RuleNameDTO?> GetById(int id)
         {
-            var ruleName = await _ruleNameRepository.GetById(id);
-            return ruleName != null ? ToDTO(ruleName) : null;
+            try
+            {
+                var ruleName = await _ruleNameRepository.GetById(id);
+                return ruleName != null ? ToDTO(ruleName) : null;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"An error occurred while retrieving the RuleName with ID {id}.", ex);
+            }
         }
 
         /// <summary>
@@ -69,8 +98,15 @@ namespace P7CreateRestApi.Services
         /// <returns>A list of RuleNameDTOs</returns>
         public async Task<List<RuleNameDTO>> GetAll()
         {
-            var ruleNames = await _ruleNameRepository.GetAll();
-            return ruleNames.Select(ToDTO).ToList();
+            try
+            {
+                var ruleNames = await _ruleNameRepository.GetAll();
+                return ruleNames.Select(ToDTO).ToList();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("An error occurred while retrieving all RuleNames.", ex);
+            }
         }
 
         /// <summary>
@@ -81,21 +117,28 @@ namespace P7CreateRestApi.Services
         /// <returns>The updated RuleNameDTO, or null if not found</returns>
         public async Task<RuleNameDTO?> Update(int id, RuleNameDTO dto)
         {
-            var existingRuleName = await _ruleNameRepository.GetById(id);
-            if (existingRuleName == null)
+            try
             {
-                return null;
+                var existingRuleName = await _ruleNameRepository.GetById(id);
+                if (existingRuleName == null)
+                {
+                    return null;
+                }
+
+                existingRuleName.Name = dto.Name;
+                existingRuleName.Description = dto.Description;
+                existingRuleName.Json = dto.Json;
+                existingRuleName.Template = dto.Template;
+                existingRuleName.SqlStr = dto.SqlStr;
+                existingRuleName.SqlPart = dto.SqlPart;
+
+                var updatedRuleName = await _ruleNameRepository.UpdateAsync(existingRuleName);
+                return ToDTO(updatedRuleName);
             }
-
-            existingRuleName.Name = dto.Name;
-            existingRuleName.Description = dto.Description;
-            existingRuleName.Json = dto.Json;
-            existingRuleName.Template = dto.Template;
-            existingRuleName.SqlStr = dto.SqlStr;
-            existingRuleName.SqlPart = dto.SqlPart;
-
-            var updatedRuleName = await _ruleNameRepository.UpdateAsync(existingRuleName);
-            return ToDTO(updatedRuleName);
+            catch (Exception ex)
+            {
+                throw new Exception($"An error occurred while updating the RuleName with ID {id}.", ex);
+            }
         }
 
         /// <summary>
@@ -104,7 +147,7 @@ namespace P7CreateRestApi.Services
         /// <param name="ruleName">The RuleName entity to convert</param>
         /// <returns>The corresponding RuleNameDTO</returns>
         private RuleNameDTO ToDTO(RuleName ruleName) =>
-            new RuleNameDTO
+            new()
             {
                 Id = ruleName.Id,
                 Name = ruleName.Name,

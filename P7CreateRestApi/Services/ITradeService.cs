@@ -19,7 +19,7 @@ namespace P7CreateRestApi.Services
         /// </summary>
         /// <param name="id">The ID of the Trade to delete.</param>
         /// <returns>The deleted TradeDTO, or null if the Trade was not found.</returns>
-        Task<TradeDTO?> Delete(int id);
+        Task<TradeDTO?> DeleteById(int id);
 
         /// <summary>
         /// Asynchronously retrieves a Trade by its ID.

@@ -1,4 +1,6 @@
-﻿using P7CreateRestApi.Domain;
+﻿using Microsoft.EntityFrameworkCore;
+using P7CreateRestApi.Data;
+using P7CreateRestApi.Domain;
 using P7CreateRestApi.DTOs;
 using P7CreateRestApi.Repositories;
 
@@ -7,108 +9,156 @@ namespace P7CreateRestApi.Services
     public class TradeService : ITradeService
     {
         private readonly ITradeRepository _tradeRepository;
+        private readonly LocalDbContext _dbContext;
 
-        public TradeService(ITradeRepository tradeRepository)
+        public TradeService(
+            ITradeRepository tradeRepository,
+            LocalDbContext dbContext
+        )
         {
             _tradeRepository = tradeRepository;
+            _dbContext = dbContext;
         }
 
         /// <summary>
-        /// Asynchronously creates a new Trade based on the provided dto.
+        /// Creates a new trade based on the provided data transfer object (DTO).
         /// </summary>
+        /// <param name="dto">The TradeDTO containing the details for the new trade.</param>
+        /// <returns>The created TradeDTO, or throws an exception if creation fails.</returns>
         public async Task<TradeDTO?> Create(TradeDTO dto)
         {
-            var trade = new Trade
+            try
             {
-                Account = dto.Account,
-                AccountType = dto.AccountType,
-                BuyQuantity = dto.BuyQuantity,
-                SellQuantity = dto.SellQuantity,
-                BuyPrice = dto.BuyPrice,
-                SellPrice = dto.SellPrice,
-                TradeDate = dto.TradeDate,
-                TradeSecurity = dto.TradeSecurity,
-                TradeStatus = dto.TradeStatus,
-                Trader = dto.Trader,
-                Benchmark = dto.Benchmark,
-                Book = dto.Book,
-                CreationName = dto.CreationName,
-                CreationDate = DateTime.Now,
-                RevisionName = dto.RevisionName,
-                RevisionDate = dto.RevisionDate,
-                DealName = dto.DealName,
-                DealType = dto.DealType,
-                SourceListId = dto.SourceListId,
-                Side = dto.Side
-            };
-            await _tradeRepository.Create(trade);
-            return ToDTO(trade);
+                var trade = ToTradeModel(dto);
+
+                await _tradeRepository.Create(trade);
+                return ToTradeDTO(trade);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("An error occurred while creating a new trade.", ex);
+            }
         }
 
         /// <summary>
-        /// Asynchronously deletes a Trade by its ID.
+        /// Deletes a specific trade by its ID.
         /// </summary>
-        public async Task<TradeDTO?> Delete(int id)
+        /// <param name="id">The ID of the trade to delete.</param>
+        /// <returns>The deleted TradeDTO, or null if not found.</returns>
+        public async Task<TradeDTO?> DeleteById(int id)
         {
-            var trade = await _tradeRepository.DeleteById(id);
-            return trade is not null ? ToDTO(trade) : null;
+            try
+            {
+                var existingTrade = await _tradeRepository.GetById(id);
+                if (existingTrade == null)
+                {
+                    return null;
+                }
+
+                _dbContext.Entry(existingTrade).State = EntityState.Detached;
+
+                var trade = await _tradeRepository.DeleteById(id);
+                return trade != null ? ToTradeDTO(trade) : null;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"An error occurred while deleting the trade with ID {id}.", ex);
+            }
         }
 
         /// <summary>
-        /// Asynchronously retrieves a Trade by its ID.
+        /// Retrieves a trade by its ID.
         /// </summary>
+        /// <param name="id">The ID of the trade to retrieve.</param>
+        /// <returns>The TradeDTO if found, or null otherwise.</returns>
         public async Task<TradeDTO?> GetById(int id)
         {
-            var trade = await _tradeRepository.GetById(id);
-            return trade is not null ? ToDTO(trade) : null;
+            try
+            {
+                var trade = await _tradeRepository.GetById(id);
+                return trade != null ? ToTradeDTO(trade) : null;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"An error occurred while retrieving the trade with ID {id}.", ex);
+            }
         }
 
         /// <summary>
-        /// Asynchronously retrieves all Trade entities.
+        /// Retrieves all trades as a list of TradeDTOs.
         /// </summary>
+        /// <returns>A list of TradeDTOs, or throws an exception if retrieval fails.</returns>
         public async Task<List<TradeDTO>> GetAll()
         {
-            var trades = await _tradeRepository.GetAll();
-            return trades.Select(ToDTO).ToList();
+            try
+            {
+                var trades = await _tradeRepository.GetAll();
+                return trades.Select(ToTradeDTO).ToList();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("An error occurred while retrieving all trades.", ex);
+            }
         }
 
         /// <summary>
-        /// Asynchronously updates an existing Trade by its ID.
+        /// Updates an existing trade based on the provided ID and data transfer object (DTO).
         /// </summary>
+        /// <param name="id">The ID of the trade to update.</param>
+        /// <param name="dto">The TradeDTO containing updated trade details.</param>
+        /// <returns>The updated TradeDTO, or null if the trade was not found.</returns>
         public async Task<TradeDTO?> Update(int id, TradeDTO dto)
         {
-            var trade = new Trade
+            try
             {
-                TradeId = id,
-                Account = dto.Account,
-                AccountType = dto.AccountType,
-                BuyQuantity = dto.BuyQuantity,
-                SellQuantity = dto.SellQuantity,
-                BuyPrice = dto.BuyPrice,
-                SellPrice = dto.SellPrice,
-                TradeDate = dto.TradeDate,
-                TradeSecurity = dto.TradeSecurity,
-                TradeStatus = dto.TradeStatus,
-                Trader = dto.Trader,
-                Benchmark = dto.Benchmark,
-                Book = dto.Book,
-                CreationName = dto.CreationName,
-                RevisionName = dto.RevisionName,
-                RevisionDate = dto.RevisionDate,
-                DealName = dto.DealName,
-                DealType = dto.DealType,
-                SourceListId = dto.SourceListId,
-                Side = dto.Side
-            };
+                var trade = ToTradeModel(dto);
+                trade.TradeId = id; // Ensuring ID consistency for update
 
-            var updatedTrade = await _tradeRepository.UpdateAsync(trade);
-            return updatedTrade is not null ? ToDTO(updatedTrade) : null;
+                var updatedTrade = await _tradeRepository.UpdateAsync(trade);
+                return updatedTrade != null ? ToTradeDTO(updatedTrade) : null;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"An error occurred while updating the trade with ID {id}.", ex);
+            }
         }
+
+        /// <summary>
+        /// Converts a TradeDTO to a Trade entity.
+        /// </summary>
+        /// <param name="dto">The TradeDTO containing data for the conversion.</param>
+        /// <returns>The corresponding Trade entity.</returns>
+        private static Trade ToTradeModel(TradeDTO dto) => new()
+        {
+            TradeId = dto.TradeId,
+            Account = dto.Account,
+            AccountType = dto.AccountType,
+            BuyQuantity = dto.BuyQuantity,
+            SellQuantity = dto.SellQuantity,
+            BuyPrice = dto.BuyPrice,
+            SellPrice = dto.SellPrice,
+            TradeDate = dto.TradeDate,
+            TradeSecurity = dto.TradeSecurity,
+            TradeStatus = dto.TradeStatus,
+            Trader = dto.Trader,
+            Benchmark = dto.Benchmark,
+            Book = dto.Book,
+            CreationName = dto.CreationName,
+            CreationDate = dto.CreationDate,
+            RevisionName = dto.RevisionName,
+            RevisionDate = dto.RevisionDate,
+            DealName = dto.DealName,
+            DealType = dto.DealType,
+            SourceListId = dto.SourceListId,
+            Side = dto.Side
+        };
 
         /// <summary>
         /// Converts a Trade entity to a TradeDTO.
         /// </summary>
-        private TradeDTO ToDTO(Trade trade) => new()
+        /// <param name="trade">The Trade entity to convert.</param>
+        /// <returns>The corresponding TradeDTO.</returns>
+        private TradeDTO ToTradeDTO(Trade trade) => new()
         {
             TradeId = trade.TradeId,
             Account = trade.Account,

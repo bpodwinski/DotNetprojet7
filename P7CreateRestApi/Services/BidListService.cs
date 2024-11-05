@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using P7CreateRestApi.Data;
 using P7CreateRestApi.Domain;
 using P7CreateRestApi.DTOs;
 using P7CreateRestApi.Repositories;
@@ -11,10 +12,15 @@ namespace P7CreateRestApi.Services
     public class BidListService : IBidListService
     {
         private readonly IBidListRepository _bidListRepository;
+        private readonly LocalDbContext _dbContext;
 
-        public BidListService(IBidListRepository bidListRepository)
+        public BidListService(
+            IBidListRepository bidListRepository,
+            LocalDbContext dbContext
+        )
         {
             _bidListRepository = bidListRepository;
+            _dbContext = dbContext;
         }
 
         /// <summary>
@@ -47,7 +53,14 @@ namespace P7CreateRestApi.Services
         {
             try
             {
-                var bidList = await _bidListRepository.GetById(id) ?? throw new Exception($"BidList with ID {id} does not exist.");
+                var existingBidList = await _bidListRepository.GetById(id);
+                if (existingBidList == null)
+                {
+                    return null;
+                }
+
+                _dbContext.Entry(existingBidList).State = EntityState.Detached;
+
                 var deletedBidList = await _bidListRepository.DeleteById(id);
                 return deletedBidList is not null ? ToBidListDTO(deletedBidList) : null;
             }
@@ -64,8 +77,15 @@ namespace P7CreateRestApi.Services
         /// <returns>The BidListDTO, or null if not found.</returns>
         public async Task<BidListDTO?> GetById(int id)
         {
-            var bidList = await _bidListRepository.GetById(id);
-            return bidList is not null ? ToBidListDTO(bidList) : null;
+            try
+            {
+                var bidList = await _bidListRepository.GetById(id);
+                return bidList is not null ? ToBidListDTO(bidList) : null;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"An error occurred while retrieving the BidList with ID {id}.", ex);
+            }
         }
 
         /// <summary>
@@ -74,8 +94,15 @@ namespace P7CreateRestApi.Services
         /// <returns>A list of BidListDTOs.</returns>
         public async Task<List<BidListDTO>> GetAll()
         {
-            var bidLists = await _bidListRepository.GetAll().ToListAsync();
-            return bidLists.Select(ToBidListDTO).ToList();
+            try
+            {
+                var bidLists = await _bidListRepository.GetAll().ToListAsync();
+                return bidLists.Select(ToBidListDTO).ToList();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("An error occurred while retrieving all BidList entities.", ex);
+            }
         }
 
         /// <summary>
@@ -84,16 +111,22 @@ namespace P7CreateRestApi.Services
         /// <param name="id">The ID of the BidList to update.</param>
         /// <param name="dto">The DTO containing the updated values.</param>
         /// <returns>The updated BidListDTO, or null if not found.</returns>
+        /// <exception cref="Exception">Throws an exception with a detailed message if the BidList is not found or if an error occurs during the update.</exception>
         public async Task<BidListDTO?> Update(int id, BidListDTO dto)
         {
-            _ = await _bidListRepository.GetById(id)
-                ?? throw new Exception($"BidList with ID {id} not found.");
+            try
+            {
+                var existingBidList = await _bidListRepository.GetById(id) ?? throw new Exception($"BidList with ID {id} not found.");
+                var bidList = ToBidList(dto);
+                bidList.BidListId = id;
 
-            var bidList = ToBidList(dto);
-            bidList.BidListId = id;
-
-            var updatedBidList = await _bidListRepository.Update(bidList);
-            return updatedBidList != null ? ToBidListDTO(updatedBidList) : null;
+                var updatedBidList = await _bidListRepository.Update(bidList);
+                return updatedBidList != null ? ToBidListDTO(updatedBidList) : null;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("An error occurred while updating the BidList entity.", ex);
+            }
         }
 
         /// <summary>
