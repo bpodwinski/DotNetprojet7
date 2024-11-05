@@ -49,7 +49,7 @@ namespace P7CreateRestApi.Test
                 Side = "Sell"
             };
 
-            _mockTradeService.Setup(service => service.Delete(1)).ReturnsAsync(trade);
+            _mockTradeService.Setup(service => service.DeleteById(1)).ReturnsAsync(trade);
 
             // Act
             var result = await _controller.Delete(1);
@@ -62,7 +62,7 @@ namespace P7CreateRestApi.Test
         public async Task Delete_TradeNotFound_ReturnsNotFoundResult()
         {
             // Arrange
-            _mockTradeService.Setup(service => service.Delete(1)).ReturnsAsync((TradeDTO)null);
+            _mockTradeService.Setup(service => service.DeleteById(1)).ReturnsAsync((TradeDTO)null);
 
             // Act
             var result = await _controller.Delete(1);
