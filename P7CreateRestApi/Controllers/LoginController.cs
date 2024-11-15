@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 using P7CreateRestApi.Domain;
 using P7CreateRestApi.Models;
 using P7CreateRestApi.Services;
@@ -77,86 +76,86 @@ namespace P7CreateRestApi.Controllers
         /// <summary>
         /// Refreshes the JWT token using the refresh token.
         /// </summary>
-        [HttpPost]
-        [AllowAnonymous]
-        [Route("refresh-token")]
-        [ProducesResponseType(200)]
-        [ProducesResponseType(401)]
-        [ProducesResponseType(500)]
-        public async Task<IActionResult> RefreshToken([FromBody] TokenRefresh model)
-        {
-            _logger.LogInformation("Token refresh attempt");
+        //[HttpPost]
+        //[AllowAnonymous]
+        //[Route("refresh-token")]
+        //[ProducesResponseType(200)]
+        //[ProducesResponseType(401)]
+        //[ProducesResponseType(500)]
+        //public async Task<IActionResult> RefreshToken([FromBody] TokenRefresh model)
+        //{
+        //    _logger.LogInformation("Token refresh attempt");
 
-            try
-            {
-                var principal = _authService.GetPrincipalFromExpiredToken(model.Token);
-                var userId = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        //    try
+        //    {
+        //        var principal = _authService.GetPrincipalFromExpiredToken(model.Token);
+        //        var userId = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-                var user = await _userManager.FindByIdAsync(userId);
-                if (user == null)
-                {
-                    _logger.LogWarning("Token refresh failed: user not found with ID '{UserId}'", userId);
-                    return Unauthorized(new { message = "Invalid user" });
-                }
+        //        var user = await _userManager.FindByIdAsync(userId);
+        //        if (user == null)
+        //        {
+        //            _logger.LogWarning("Token refresh failed: user not found with ID '{UserId}'", userId);
+        //            return Unauthorized(new { message = "Invalid user" });
+        //        }
 
-                var storedRefreshToken = await _authService.GetRefreshToken(user);
-                var refreshTokenExpiry = await _authService.GetRefreshTokenExpiry(user);
+        //        var storedRefreshToken = await _authService.GetRefreshToken(user);
+        //        var refreshTokenExpiry = await _authService.GetRefreshTokenExpiry(user);
 
-                if (storedRefreshToken != model.RefreshToken || refreshTokenExpiry <= DateTime.UtcNow)
-                {
-                    _logger.LogWarning("Token refresh failed: invalid or expired refresh token for user '{UserId}'", userId);
-                    return Unauthorized(new { message = "Invalid or expired refresh token" });
-                }
+        //        if (storedRefreshToken != model.RefreshToken || refreshTokenExpiry <= DateTime.UtcNow)
+        //        {
+        //            _logger.LogWarning("Token refresh failed: invalid or expired refresh token for user '{UserId}'", userId);
+        //            return Unauthorized(new { message = "Invalid or expired refresh token" });
+        //        }
 
-                var userClaims = await _userManager.GetClaimsAsync(user);
-                var newJwtToken = _authService.GenerateToken(user, userClaims);
-                var newRefreshToken = _authService.GenerateRefreshToken();
+        //        var userClaims = await _userManager.GetClaimsAsync(user);
+        //        var newJwtToken = _authService.GenerateToken(user, userClaims);
+        //        var newRefreshToken = _authService.GenerateRefreshToken();
 
-                await _authService.AddRefreshToken(user, newRefreshToken);
+        //        await _authService.AddRefreshToken(user, newRefreshToken);
 
-                _logger.LogInformation("Token refresh successful for user ID: {UserId}", userId);
-                return Ok(new { Token = newJwtToken, RefreshToken = newRefreshToken });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "An internal error occurred during token refresh");
-                return StatusCode(500, new { message = "An internal error occurred" });
-            }
-        }
+        //        _logger.LogInformation("Token refresh successful for user ID: {UserId}", userId);
+        //        return Ok(new { Token = newJwtToken, RefreshToken = newRefreshToken });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogError(ex, "An internal error occurred during token refresh");
+        //        return StatusCode(500, new { message = "An internal error occurred" });
+        //    }
+        //}
 
         /// <summary>
         /// Revokes the refresh token for the current user.
         /// </summary>
-        [HttpPost]
-        [Authorize]
-        [Route("revoke-refresh-token")]
-        [ProducesResponseType(200)]
-        [ProducesResponseType(401)]
-        [ProducesResponseType(500)]
-        public async Task<IActionResult> RevokeRefreshToken()
-        {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            _logger.LogInformation("Refresh token revocation attempt for user ID: {UserId}", userId);
+        //[HttpPost]
+        //[Authorize]
+        //[Route("revoke-refresh-token")]
+        //[ProducesResponseType(200)]
+        //[ProducesResponseType(401)]
+        //[ProducesResponseType(500)]
+        //public async Task<IActionResult> RevokeRefreshToken()
+        //{
+        //    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        //    _logger.LogInformation("Refresh token revocation attempt for user ID: {UserId}", userId);
 
-            try
-            {
-                var user = await _userManager.FindByIdAsync(userId);
-                if (user == null)
-                {
-                    _logger.LogWarning("Refresh token revocation failed: user not found with ID '{UserId}'", userId);
-                    return BadRequest(new { message = "User not found" });
-                }
+        //    try
+        //    {
+        //        var user = await _userManager.FindByIdAsync(userId);
+        //        if (user == null)
+        //        {
+        //            _logger.LogWarning("Refresh token revocation failed: user not found with ID '{UserId}'", userId);
+        //            return BadRequest(new { message = "User not found" });
+        //        }
 
-                await _authService.RevokeRefreshToken(user);
-                _logger.LogInformation("Refresh token successfully revoked for user ID: {UserId}", userId);
+        //        await _authService.RevokeRefreshToken(user);
+        //        _logger.LogInformation("Refresh token successfully revoked for user ID: {UserId}", userId);
 
-                return Ok(new { message = "Refresh token revoked" });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "An internal error occurred during refresh token revocation for user ID: {UserId}", userId);
-                return StatusCode(500, new { message = "An internal error occurred" });
-            }
-        }
+        //        return Ok(new { message = "Refresh token revoked" });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogError(ex, "An internal error occurred during refresh token revocation for user ID: {UserId}", userId);
+        //        return StatusCode(500, new { message = "An internal error occurred" });
+        //    }
+        //}
     }
 }

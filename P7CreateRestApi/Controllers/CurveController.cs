@@ -60,6 +60,7 @@ namespace P7CreateRestApi.Controllers
         {
             if (!ModelState.IsValid)
             {
+                _logger.LogWarning("Invalid model state for creating a CurvePoint.");
                 return BadRequest(ModelState);
             }
 

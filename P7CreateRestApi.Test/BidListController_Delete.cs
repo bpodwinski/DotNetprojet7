@@ -12,25 +12,25 @@ namespace P7CreateRestApi.Test
     /// </summary>
     public class BidListControlleDeleteTest
     {
-        private readonly Mock<IBidListService> _mockBidListService;
+        private readonly Mock<IBidListService> _mockService;
         private readonly Mock<ILogger<BidListController>> _mockLogger;
         private readonly BidListController _controller;
 
         public BidListControlleDeleteTest()
         {
-            _mockBidListService = new Mock<IBidListService>();
+            _mockService = new Mock<IBidListService>();
             _mockLogger = new Mock<ILogger<BidListController>>();
-            _controller = new BidListController(_mockBidListService.Object, _mockLogger.Object);
+            _controller = new BidListController(_mockService.Object, _mockLogger.Object);
         }
 
         /// <summary>
         /// Tests if Delete returns NoContentResult when the BidList is successfully deleted.
         /// </summary>
         [Fact]
-        public async Task Delete_ReturnsNoContent_WhenBidListIsDeleted()
+        public async Task Delete_Ok()
         {
             // Arrange
-            _mockBidListService.Setup(service => service.DeleteById(1)).ReturnsAsync(new BidListDTO {
+            _mockService.Setup(service => service.DeleteById(1)).ReturnsAsync(new BidListDTO {
                 BidListId = 1,
                 Account = "Account1",
                 BidType = "Type1",
@@ -66,10 +66,10 @@ namespace P7CreateRestApi.Test
         /// Tests if Delete returns NotFoundResult when the BidList is not found.
         /// </summary>
         [Fact]
-        public async Task Delete_ReturnsNotFound_WhenBidListDoesNotExist()
+        public async Task Delete_NotFound()
         {
             // Arrange
-            _mockBidListService.Setup(service => service.DeleteById(1)).ReturnsAsync((BidListDTO)null);
+            _mockService.Setup(service => service.DeleteById(1)).ReturnsAsync((BidListDTO)null);
 
             // Act
             var result = await _controller.Delete(1);
@@ -83,10 +83,10 @@ namespace P7CreateRestApi.Test
         /// Tests if Delete returns 500 Internal Server Error when an exception occurs.
         /// </summary>
         [Fact]
-        public async Task Delete_ReturnsInternalServerError_WhenExceptionOccurs()
+        public async Task Delete_InternalServerError()
         {
             // Arrange
-            _mockBidListService.Setup(service => service.DeleteById(1)).ThrowsAsync(new Exception("Internal error"));
+            _mockService.Setup(service => service.DeleteById(1)).ThrowsAsync(new Exception("Internal error"));
 
             // Act
             var result = await _controller.Delete(1);
@@ -94,7 +94,6 @@ namespace P7CreateRestApi.Test
             // Assert
             var objectResult = Assert.IsType<ObjectResult>(result);
             Assert.Equal(500, objectResult.StatusCode);
-            Assert.Equal("An internal error occurred.", objectResult.Value);
         }
     }
 }

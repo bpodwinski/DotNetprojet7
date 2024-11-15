@@ -96,5 +96,46 @@ namespace P7CreateRestApi.Test
             var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
             Assert.Equal("Trade with ID 1 not found.", notFoundResult.Value);
         }
+
+        /// <summary>
+        /// Tests if Update returns 500 Internal Server Error when an exception occurs.
+        /// </summary>
+        [Fact]
+        public async Task Update_InternalServerError()
+        {
+            // Arrange
+            var tradeDto = new TradeDTO
+            {
+                TradeId = 1,
+                Account = "Account1",
+                AccountType = "Type1",
+                BuyQuantity = 100,
+                SellQuantity = 50,
+                BuyPrice = 10.5,
+                SellPrice = 12.0,
+                TradeDate = DateTime.UtcNow,
+                TradeSecurity = "Sec1",
+                TradeStatus = "Open",
+                Trader = "Trader1",
+                Benchmark = "Benchmark1",
+                Book = "Book1",
+                CreationName = "Creator1",
+                CreationDate = DateTime.UtcNow,
+                RevisionName = "Revisor1",
+                RevisionDate = DateTime.UtcNow,
+                DealName = "Deal1",
+                DealType = "TypeA",
+                SourceListId = "Source1",
+                Side = "Buy"
+            };
+            _mockTradeService.Setup(service => service.Update(1, tradeDto)).ThrowsAsync(new Exception("Test exception"));
+
+            // Act
+            var result = await _controller.Update(1, tradeDto);
+
+            // Assert
+            var statusCodeResult = Assert.IsType<ObjectResult>(result);
+            Assert.Equal(500, statusCodeResult.StatusCode);
+        }
     }
 }

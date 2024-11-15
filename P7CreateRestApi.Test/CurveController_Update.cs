@@ -57,5 +57,24 @@ namespace P7CreateRestApi.Test
             // Assert
             Assert.IsType<NotFoundObjectResult>(result);
         }
+
+        /// <summary>
+        /// Tests if Update returns 500 Internal Server Error when an exception occurs.
+        /// </summary>
+        [Fact]
+        public async Task Update_InternalServerError()
+        {
+            // Arrange
+            int curvePointId = 1;
+            var curvePointDto = new CurvePointDTO { Id = 1, CurveId = 1 };
+            _mockService.Setup(service => service.Update(curvePointId, curvePointDto)).ThrowsAsync(new Exception("Internal error"));
+
+            // Act
+            var result = await _controller.Update(curvePointId, curvePointDto);
+
+            // Assert
+            var objectResult = Assert.IsType<ObjectResult>(result);
+            Assert.Equal(500, objectResult.StatusCode);
+        }
     }
 }

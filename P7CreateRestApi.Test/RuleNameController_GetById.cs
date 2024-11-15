@@ -57,5 +57,22 @@ namespace P7CreateRestApi.Test
             // Assert
             Assert.IsType<NotFoundObjectResult>(result);
         }
+
+        /// <summary>
+        /// Tests if GetById returns 500 Internal Server Error when an exception occurs.
+        /// </summary>
+        [Fact]
+        public async Task GetById_InternalServerError()
+        {
+            // Arrange
+            _mockService.Setup(service => service.GetById(1)).ThrowsAsync(new Exception("Test Exception"));
+
+            // Act
+            var result = await _controller.GetById(1);
+
+            // Assert
+            var statusCodeResult = Assert.IsType<ObjectResult>(result);
+            Assert.Equal(500, statusCodeResult.StatusCode);
+        }
     }
 }

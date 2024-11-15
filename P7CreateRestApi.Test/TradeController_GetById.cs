@@ -10,14 +10,14 @@ namespace P7CreateRestApi.Test
     public class TradeController_GetByIdTest
     {
         private readonly TradeController _controller;
-        private readonly Mock<ITradeService> _mockTradeService;
+        private readonly Mock<ITradeService> _mockService;
         private readonly Mock<ILogger<TradeController>> _mockLogger;
 
         public TradeController_GetByIdTest()
         {
-            _mockTradeService = new Mock<ITradeService>();
+            _mockService = new Mock<ITradeService>();
             _mockLogger = new Mock<ILogger<TradeController>>();
-            _controller = new TradeController(_mockTradeService.Object, _mockLogger.Object);
+            _controller = new TradeController(_mockService.Object, _mockLogger.Object);
         }
 
         [Fact]
@@ -50,7 +50,7 @@ namespace P7CreateRestApi.Test
                 Side = "Buy"
             };
 
-            _mockTradeService.Setup(service => service.GetById(tradeId)).ReturnsAsync(mockTrade);
+            _mockService.Setup(service => service.GetById(tradeId)).ReturnsAsync(mockTrade);
 
             // Act
             var result = await _controller.GetById(tradeId);
@@ -66,7 +66,7 @@ namespace P7CreateRestApi.Test
         {
             // Arrange
             var tradeId = 1;
-            _mockTradeService.Setup(service => service.GetById(tradeId)).ReturnsAsync((TradeDTO)null);
+            _mockService.Setup(service => service.GetById(tradeId)).ReturnsAsync((TradeDTO)null);
 
             // Act
             var result = await _controller.GetById(tradeId);
@@ -76,15 +76,17 @@ namespace P7CreateRestApi.Test
             Assert.Equal($"Trade with ID {tradeId} not found.", notFoundResult.Value);
         }
 
+        /// <summary>
+        /// Tests if GetById returns 500 Internal Server Error when an exception occurs.
+        /// </summary>
         [Fact]
-        public async Task GetById_Returns500_WhenExceptionIsThrown()
+        public async Task GetById_InternalServerError()
         {
             // Arrange
-            var tradeId = 1;
-            _mockTradeService.Setup(service => service.GetById(tradeId)).ThrowsAsync(new System.Exception());
+            _mockService.Setup(service => service.GetById(1)).ThrowsAsync(new Exception("Test Exception"));
 
             // Act
-            var result = await _controller.GetById(tradeId);
+            var result = await _controller.GetById(1);
 
             // Assert
             var statusCodeResult = Assert.IsType<ObjectResult>(result);

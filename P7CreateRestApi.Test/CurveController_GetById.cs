@@ -27,7 +27,7 @@ namespace P7CreateRestApi.Test
         /// Tests if GetById returns OkResult when the CurvePoint is found.
         /// </summary>
         [Fact]
-        public async Task GetById_ReturnsOkResult_WithCurvePoint()
+        public async Task GetById_Ok()
         {
             // Arrange
             var curvePoint = new CurvePointDTO { Id = 1, CurveId = 1 };
@@ -46,7 +46,7 @@ namespace P7CreateRestApi.Test
         /// Tests if GetById returns NotFoundResult when the CurvePoint is not found.
         /// </summary>
         [Fact]
-        public async Task GetById_ReturnsNotFoundResult()
+        public async Task GetById_NotFoundResult()
         {
             // Arrange
             _mockService.Setup(service => service.GetById(1)).ReturnsAsync((CurvePointDTO)null);
@@ -56,6 +56,23 @@ namespace P7CreateRestApi.Test
 
             // Assert
             Assert.IsType<NotFoundObjectResult>(result);
+        }
+
+        /// <summary>
+        /// Tests if GetById returns 500 Internal Server Error when an exception occurs.
+        /// </summary>
+        [Fact]
+        public async Task GetById_InternalServerError()
+        {
+            // Arrange
+            _mockService.Setup(service => service.GetById(1)).ThrowsAsync(new Exception("Test Exception"));
+
+            // Act
+            var result = await _controller.GetById(1);
+
+            // Assert
+            var statusCodeResult = Assert.IsType<ObjectResult>(result);
+            Assert.Equal(500, statusCodeResult.StatusCode);
         }
     }
 }

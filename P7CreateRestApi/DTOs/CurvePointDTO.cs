@@ -18,6 +18,7 @@ namespace P7CreateRestApi.DTOs
         /// Gets or sets the ID of the associated curve.
         /// Must be a positive integer between 0 and 255.
         /// </summary>
+        [Required(ErrorMessage = "The CurveId field is required.")]
         [Range(0, byte.MaxValue, ErrorMessage = "Le CurveId doit être un entier positif compris entre 0 et 255.")]
         public byte? CurveId { get; set; }
 

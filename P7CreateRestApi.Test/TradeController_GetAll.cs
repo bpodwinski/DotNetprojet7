@@ -9,15 +9,15 @@ namespace P7CreateRestApi.Test
 {
     public class TradeControllerGetAllTest
     {
-        private readonly Mock<ITradeService> _mockTradeService;
+        private readonly Mock<ITradeService> _mockService;
         private readonly Mock<ILogger<TradeController>> _mockLogger;
         private readonly TradeController _controller;
 
         public TradeControllerGetAllTest()
         {
-            _mockTradeService = new Mock<ITradeService>();
+            _mockService = new Mock<ITradeService>();
             _mockLogger = new Mock<ILogger<TradeController>>();
-            _controller = new TradeController(_mockTradeService.Object, _mockLogger.Object);
+            _controller = new TradeController(_mockService.Object, _mockLogger.Object);
         }
 
         [Fact]
@@ -25,58 +25,58 @@ namespace P7CreateRestApi.Test
         {
             // Arrange
             var mockTrades = new List<TradeDTO>
-        {
-            new TradeDTO
             {
-                TradeId = 1,
-                Account = "Account1",
-                AccountType = "Type1",
-                BuyQuantity = 100,
-                SellQuantity = 50,
-                BuyPrice = 10.5,
-                SellPrice = 12.0,
-                TradeDate = DateTime.UtcNow,
-                TradeSecurity = "Sec1",
-                TradeStatus = "Open",
-                Trader = "Trader1",
-                Benchmark = "Benchmark1",
-                Book = "Book1",
-                CreationName = "Creator1",
-                CreationDate = DateTime.UtcNow,
-                RevisionName = "Revisor1",
-                RevisionDate = DateTime.UtcNow,
-                DealName = "Deal1",
-                DealType = "TypeA",
-                SourceListId = "Source1",
-                Side = "Buy"
-            },
-            new TradeDTO
-            {
-                TradeId = 2,
-                Account = "Account2",
-                AccountType = "Type2",
-                BuyQuantity = 200,
-                SellQuantity = 100,
-                BuyPrice = 20.5,
-                SellPrice = 22.0,
-                TradeDate = DateTime.UtcNow,
-                TradeSecurity = "Sec2",
-                TradeStatus = "Closed",
-                Trader = "Trader2",
-                Benchmark = "Benchmark2",
-                Book = "Book2",
-                CreationName = "Creator2",
-                CreationDate = DateTime.UtcNow,
-                RevisionName = "Revisor2",
-                RevisionDate = DateTime.UtcNow,
-                DealName = "Deal2",
-                DealType = "TypeB",
-                SourceListId = "Source2",
-                Side = "Sell"
-            }
-        };
+                new TradeDTO
+                {
+                    TradeId = 1,
+                    Account = "Account1",
+                    AccountType = "Type1",
+                    BuyQuantity = 100,
+                    SellQuantity = 50,
+                    BuyPrice = 10.5,
+                    SellPrice = 12.0,
+                    TradeDate = DateTime.UtcNow,
+                    TradeSecurity = "Sec1",
+                    TradeStatus = "Open",
+                    Trader = "Trader1",
+                    Benchmark = "Benchmark1",
+                    Book = "Book1",
+                    CreationName = "Creator1",
+                    CreationDate = DateTime.UtcNow,
+                    RevisionName = "Revisor1",
+                    RevisionDate = DateTime.UtcNow,
+                    DealName = "Deal1",
+                    DealType = "TypeA",
+                    SourceListId = "Source1",
+                    Side = "Buy"
+                },
+                new TradeDTO
+                {
+                    TradeId = 2,
+                    Account = "Account2",
+                    AccountType = "Type2",
+                    BuyQuantity = 200,
+                    SellQuantity = 100,
+                    BuyPrice = 20.5,
+                    SellPrice = 22.0,
+                    TradeDate = DateTime.UtcNow,
+                    TradeSecurity = "Sec2",
+                    TradeStatus = "Closed",
+                    Trader = "Trader2",
+                    Benchmark = "Benchmark2",
+                    Book = "Book2",
+                    CreationName = "Creator2",
+                    CreationDate = DateTime.UtcNow,
+                    RevisionName = "Revisor2",
+                    RevisionDate = DateTime.UtcNow,
+                    DealName = "Deal2",
+                    DealType = "TypeB",
+                    SourceListId = "Source2",
+                    Side = "Sell"
+                }
+            };
 
-            _mockTradeService.Setup(service => service.GetAll()).ReturnsAsync(mockTrades);
+            _mockService.Setup(service => service.GetAll()).ReturnsAsync(mockTrades);
 
             // Act
             var result = await _controller.GetAll();
@@ -85,6 +85,23 @@ namespace P7CreateRestApi.Test
             var okResult = Assert.IsType<OkObjectResult>(result);
             var returnTrades = Assert.IsType<List<TradeDTO>>(okResult.Value);
             Assert.Equal(2, returnTrades.Count);
+        }
+
+        /// <summary>
+        /// Tests if GetAll returns 500 Internal Server Error when an exception occurs.
+        /// </summary>
+        [Fact]
+        public async Task GetAll_InternalServerError()
+        {
+            // Arrange
+            _mockService.Setup(service => service.GetAll()).ThrowsAsync(new Exception("Test Exception"));
+
+            // Act
+            var result = await _controller.GetAll();
+
+            // Assert
+            var statusCodeResult = Assert.IsType<ObjectResult>(result);
+            Assert.Equal(500, statusCodeResult.StatusCode);
         }
     }
 }

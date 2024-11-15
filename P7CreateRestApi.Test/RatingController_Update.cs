@@ -27,7 +27,7 @@ namespace P7CreateRestApi.Test
         /// Tests if Update returns OkResult when the Rating is successfully updated.
         /// </summary>
         [Fact]
-        public async Task Update_ReturnsOkResult()
+        public async Task Update_Ok()
         {
             // Arrange
             var updatedRating = new RatingDTO { Id = 1, MoodysRating = "A1", SandPRating = "AA+", FitchRating = "A+", OrderNumber = 1 };
@@ -46,7 +46,7 @@ namespace P7CreateRestApi.Test
         /// Tests if Update returns NotFoundResult when the Rating is not found.
         /// </summary>
         [Fact]
-        public async Task Update_ReturnsNotFoundResult()
+        public async Task Update_NotFound()
         {
             // Arrange
             _mockService.Setup(service => service.Update(1, It.IsAny<RatingDTO>())).ReturnsAsync((RatingDTO)null);
@@ -56,6 +56,24 @@ namespace P7CreateRestApi.Test
 
             // Assert
             Assert.IsType<NotFoundObjectResult>(result);
+        }
+
+        /// <summary>
+        /// Tests if Update returns 500 Internal Server Error when an exception occurs.
+        /// </summary>
+        [Fact]
+        public async Task Update_InternalServerError()
+        {
+            // Arrange
+            var curveRatingDto = new RatingDTO { MoodysRating = "A1", SandPRating = "AA+", FitchRating = "A+", OrderNumber = 1 };
+            _mockService.Setup(service => service.Update(1, curveRatingDto)).ThrowsAsync(new Exception("Internal error"));
+
+            // Act
+            var result = await _controller.Update(1, curveRatingDto);
+
+            // Assert
+            var objectResult = Assert.IsType<ObjectResult>(result);
+            Assert.Equal(500, objectResult.StatusCode);
         }
     }
 }

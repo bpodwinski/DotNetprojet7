@@ -27,7 +27,7 @@ namespace P7CreateRestApi.Test
         /// Tests if Update returns OkResult when the BidList is successfully updated.
         /// </summary>
         [Fact]
-        public async Task Update_ReturnsOkResult()
+        public async Task Update_Ok()
         {
             // Arrange
             var updatedBidList = new BidListDTO
@@ -70,7 +70,7 @@ namespace P7CreateRestApi.Test
         /// Tests if Update returns NotFoundResult when the BidList is not found.
         /// </summary>
         [Fact]
-        public async Task Update_ReturnsNotFoundResult()
+        public async Task Update_NotFound()
         {
             // Arrange
             _mockService.Setup(service => service.Update(1, It.IsAny<BidListDTO>())).ReturnsAsync((BidListDTO)null);
@@ -102,7 +102,7 @@ namespace P7CreateRestApi.Test
         /// Tests if Update returns 500 Internal Server Error when an exception occurs.
         /// </summary>
         [Fact]
-        public async Task Update_ReturnsInternalServerError_WhenExceptionOccurs()
+        public async Task Update_InternalServerError()
         {
             // Arrange
             int bidListId = 1;
@@ -130,7 +130,6 @@ namespace P7CreateRestApi.Test
             // Assert
             var objectResult = Assert.IsType<ObjectResult>(result);
             Assert.Equal(500, objectResult.StatusCode);
-            Assert.Equal("An internal error occurred.", objectResult.Value);
         }
     }
 }

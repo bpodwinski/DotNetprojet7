@@ -29,7 +29,7 @@ namespace P7CreateRestApi.Services
             try
             {
                 var curvePoints = await _curvePointRepository.GetAll();
-                return curvePoints.Select(ToDTO).ToList();
+                return curvePoints.Select(ToCurvePointDTO).ToList();
             }
             catch (Exception ex)
             {
@@ -46,16 +46,9 @@ namespace P7CreateRestApi.Services
         {
             try
             {
-                var curvePoint = new CurvePoint
-                {
-                    CurveId = dto.CurveId,
-                    AsOfDate = dto.AsOfDate,
-                    Term = dto.Term,
-                    CurvePointValue = dto.CurvePointValue,
-                    CreationDate = DateTime.Now
-                };
+                var curvePoint = ToCurvePoint(dto);
                 await _curvePointRepository.Create(curvePoint);
-                return ToDTO(curvePoint);
+                return ToCurvePointDTO(curvePoint);
             }
             catch (Exception ex)
             {
@@ -73,7 +66,7 @@ namespace P7CreateRestApi.Services
             try
             {
                 var curvePoint = await _curvePointRepository.GetById(id);
-                return curvePoint != null ? ToDTO(curvePoint) : null;
+                return curvePoint != null ? ToCurvePointDTO(curvePoint) : null;
             }
             catch (Exception ex)
             {
@@ -92,15 +85,10 @@ namespace P7CreateRestApi.Services
             try
             {
                 var existingCurvePoint = await _curvePointRepository.GetById(id) ?? throw new Exception($"CurvePoint with ID {id} not found.");
-
-                // Mise à jour de l'entité
-                existingCurvePoint.CurveId = dto.CurveId;
-                existingCurvePoint.AsOfDate = dto.AsOfDate;
-                existingCurvePoint.Term = dto.Term;
-                existingCurvePoint.CurvePointValue = dto.CurvePointValue;
+                var curvePoint = ToCurvePoint(dto);
 
                 var updatedCurvePoint = await _curvePointRepository.Update(existingCurvePoint);
-                return ToDTO(updatedCurvePoint);
+                return updatedCurvePoint != null ? ToCurvePointDTO(updatedCurvePoint) : null;
             }
             catch (Exception ex)
             {
@@ -126,7 +114,7 @@ namespace P7CreateRestApi.Services
                 _dbContext.Entry(existingCurvePoint).State = EntityState.Detached;
 
                 var deletedCurvePoint = await _curvePointRepository.DeleteById(id);
-                return deletedCurvePoint != null ? ToDTO(deletedCurvePoint) : null;
+                return deletedCurvePoint != null ? ToCurvePointDTO(deletedCurvePoint) : null;
             }
             catch (Exception ex)
             {
@@ -135,17 +123,29 @@ namespace P7CreateRestApi.Services
         }
 
         /// <summary>
-        /// Maps a CurvePoint entity to a CurvePointDTO.
+        /// Converts a BidListDTO to a BidList entity.
         /// </summary>
-        /// <param name="curvePoint">The CurvePoint entity</param>
-        /// <returns>The corresponding CurvePointDTO</returns>
-        private CurvePointDTO ToDTO(CurvePoint curvePoint) =>
-            new()
-            {
-                Id = curvePoint.Id,
-                CurveId = curvePoint.CurveId,
-                AsOfDate = curvePoint.AsOfDate,
-                CurvePointValue = curvePoint.CurvePointValue
-            };
+        /// <param name="dto">The BidListDTO containing data.</param>
+        /// <returns>The corresponding BidList entity.</returns>
+        private static CurvePoint ToCurvePoint(CurvePointDTO dto) => new()
+        {
+            Id = dto.Id,
+            CurveId = dto.CurveId,
+            AsOfDate = dto.AsOfDate,
+            CurvePointValue = dto.CurvePointValue
+        };
+
+        /// <summary>
+        /// Converts a BidList entity to a BidListDTO.
+        /// </summary>
+        /// <param name="bidList">The BidList entity to convert.</param>
+        /// <returns>The corresponding BidListDTO.</returns>
+        private static CurvePointDTO ToCurvePointDTO(CurvePoint curvePoint) => new()
+        {
+            Id = curvePoint.Id,
+            CurveId = curvePoint.CurveId,
+            AsOfDate = curvePoint.AsOfDate,
+            CurvePointValue = curvePoint.CurvePointValue
+        };
     }
 }

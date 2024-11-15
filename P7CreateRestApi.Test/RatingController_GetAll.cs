@@ -27,7 +27,7 @@ namespace P7CreateRestApi.Test
         /// Tests if GetAll returns OkResult with a list of RatingDTOs.
         /// </summary>
         [Fact]
-        public async Task GetAll_ReturnsOkResult_WithListOfRatingDTOs()
+        public async Task GetAll_Ok()
         {
             // Arrange
             var ratings = new List<RatingDTO>
@@ -44,6 +44,23 @@ namespace P7CreateRestApi.Test
             var okResult = Assert.IsType<OkObjectResult>(result);
             var returnValue = Assert.IsType<List<RatingDTO>>(okResult.Value);
             Assert.Equal(2, returnValue.Count);
+        }
+
+        /// <summary>
+        /// Tests if GetAll returns 500 Internal Server Error when an exception occurs.
+        /// </summary>
+        [Fact]
+        public async Task GetAll_InternalServerError()
+        {
+            // Arrange
+            _mockService.Setup(service => service.GetAll()).ThrowsAsync(new Exception("Test Exception"));
+
+            // Act
+            var result = await _controller.GetAll();
+
+            // Assert
+            var statusCodeResult = Assert.IsType<ObjectResult>(result);
+            Assert.Equal(500, statusCodeResult.StatusCode);
         }
     }
 }

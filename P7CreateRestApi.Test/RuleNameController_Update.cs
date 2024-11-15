@@ -27,7 +27,7 @@ namespace P7CreateRestApi.Test
         /// Tests if Update returns OkResult when the RuleName is successfully updated.
         /// </summary>
         [Fact]
-        public async Task Update_ReturnsOkResult()
+        public async Task Update_Ok()
         {
             // Arrange
             var updatedRuleName = new RuleNameDTO { Id = 1, Name = "UpdatedRule", Description = "UpdatedDesc", Json = "{}", Template = "TemplateUpdated", SqlStr = "SELECT *", SqlPart = "WHERE" };
@@ -46,7 +46,7 @@ namespace P7CreateRestApi.Test
         /// Tests if Update returns NotFoundResult when the RuleName is not found.
         /// </summary>
         [Fact]
-        public async Task Update_ReturnsNotFoundResult()
+        public async Task Update_NotFound()
         {
             // Arrange
             _mockService.Setup(service => service.Update(1, It.IsAny<RuleNameDTO>())).ReturnsAsync((RuleNameDTO)null);
@@ -56,6 +56,24 @@ namespace P7CreateRestApi.Test
 
             // Assert
             Assert.IsType<NotFoundObjectResult>(result);
+        }
+
+        /// <summary>
+        /// Tests if Update returns 500 Internal Server Error when an exception occurs.
+        /// </summary>
+        [Fact]
+        public async Task Update_ReturnsInternalServerError()
+        {
+            // Arrange
+            var ruleNameDto = new RuleNameDTO { Name = "UpdatedRule", Description = "UpdatedDesc", Json = "{}", Template = "TemplateUpdated", SqlStr = "SELECT *", SqlPart = "WHERE" };
+            _mockService.Setup(service => service.Update(1, ruleNameDto)).ThrowsAsync(new Exception("Internal error"));
+
+            // Act
+            var result = await _controller.Update(1, ruleNameDto);
+
+            // Assert
+            var objectResult = Assert.IsType<ObjectResult>(result);
+            Assert.Equal(500, objectResult.StatusCode);
         }
     }
 }

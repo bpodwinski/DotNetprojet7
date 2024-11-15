@@ -27,7 +27,7 @@ namespace P7CreateRestApi.Test
         /// Tests if Delete returns NoContentResult when the Rating is successfully deleted.
         /// </summary>
         [Fact]
-        public async Task Delete_ReturnsNoContentResult()
+        public async Task Delete_Ok()
         {
             // Arrange
             var deletedRating = new RatingDTO { Id = 1, MoodysRating = "A1", SandPRating = "AA+", FitchRating = "A+", OrderNumber = 1 };
@@ -44,7 +44,7 @@ namespace P7CreateRestApi.Test
         /// Tests if Delete returns NotFoundResult when the Rating is not found.
         /// </summary>
         [Fact]
-        public async Task Delete_ReturnsNotFoundResult()
+        public async Task Delete_NotFoundResult()
         {
             // Arrange
             _mockService.Setup(service => service.Delete(1)).ReturnsAsync((RatingDTO)null);
@@ -54,6 +54,23 @@ namespace P7CreateRestApi.Test
 
             // Assert
             Assert.IsType<NotFoundObjectResult>(result);
+        }
+
+        /// <summary>
+        /// Tests if Delete returns 500 Internal Server Error when an exception occurs.
+        /// </summary>
+        [Fact]
+        public async Task Delete_InternalServerError()
+        {
+            // Arrange
+            _mockService.Setup(service => service.Delete(1)).ThrowsAsync(new Exception("Internal error"));
+
+            // Act
+            var result = await _controller.Delete(1);
+
+            // Assert
+            var objectResult = Assert.IsType<ObjectResult>(result);
+            Assert.Equal(500, objectResult.StatusCode);
         }
     }
 }

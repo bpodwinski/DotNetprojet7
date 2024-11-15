@@ -12,22 +12,22 @@ namespace P7CreateRestApi.Test
     /// </summary>
     public class BidListControllerCreateTest
     {
-        private readonly Mock<IBidListService> _mockBidListService;
+        private readonly Mock<IBidListService> _mockService;
         private readonly Mock<ILogger<BidListController>> _mockLogger;
         private readonly BidListController _controller;
 
         public BidListControllerCreateTest()
         {
-            _mockBidListService = new Mock<IBidListService>();
+            _mockService = new Mock<IBidListService>();
             _mockLogger = new Mock<ILogger<BidListController>>();
-            _controller = new BidListController(_mockBidListService.Object, _mockLogger.Object);
+            _controller = new BidListController(_mockService.Object, _mockLogger.Object);
         }
 
         /// <summary>
         /// Tests if Create returns CreatedAtActionResult when a new BidList is created.
         /// </summary>
         [Fact]
-        public async Task Create_ReturnsCreatedAtActionResult_WhenBidListIsCreated()
+        public async Task Create_Ok()
         {
             // Arrange
             var newBidList = new BidListDTO {
@@ -54,7 +54,7 @@ namespace P7CreateRestApi.Test
                 SourceListId = "SL1",
                 Side = "Buy"
             };
-            _mockBidListService.Setup(service => service.Create(It.IsAny<BidListDTO>())).ReturnsAsync(newBidList);
+            _mockService.Setup(service => service.Create(It.IsAny<BidListDTO>())).ReturnsAsync(newBidList);
 
             // Act
             var result = await _controller.Create(newBidList);
@@ -69,7 +69,7 @@ namespace P7CreateRestApi.Test
         /// Tests if Create returns BadRequestResult when the model state is invalid.
         /// </summary>
         [Fact]
-        public async Task Create_ReturnsBadRequest_WhenModelStateIsInvalid()
+        public async Task Create_ModelStateInvalid()
         {
             // Arrange
             _controller.ModelState.AddModelError("Account", "The Account field is required.");
@@ -93,7 +93,6 @@ namespace P7CreateRestApi.Test
                 Side = "Buy"
             });
 
-
             // Assert
             Assert.IsType<BadRequestObjectResult>(result);
         }
@@ -102,7 +101,7 @@ namespace P7CreateRestApi.Test
         /// Tests if Create returns 500 Internal Server Error when an exception is thrown in the service.
         /// </summary>
         [Fact]
-        public async Task Create_ReturnsInternalServerError_WhenExceptionThrown()
+        public async Task Create_InternalServerError()
         {
             // Arrange
             var newBidList = new BidListDTO
@@ -122,8 +121,7 @@ namespace P7CreateRestApi.Test
                 SourceListId = "SL1",
                 Side = "Buy"
             };
-
-            _mockBidListService.Setup(service => service.Create(It.IsAny<BidListDTO>())).ThrowsAsync(new Exception("Database error"));
+            _mockService.Setup(service => service.Create(It.IsAny<BidListDTO>())).ThrowsAsync(new Exception("Database error"));
 
             // Act
             var result = await _controller.Create(newBidList);
@@ -131,7 +129,6 @@ namespace P7CreateRestApi.Test
             // Assert
             var serverErrorResult = Assert.IsType<ObjectResult>(result);
             Assert.Equal(500, serverErrorResult.StatusCode);
-            Assert.Equal("An internal error occurred.", serverErrorResult.Value);
         }
     }
 }

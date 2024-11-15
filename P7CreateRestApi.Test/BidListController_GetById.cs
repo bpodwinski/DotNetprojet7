@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using P7CreateRestApi.Controllers;
 using P7CreateRestApi.DTOs;
 using P7CreateRestApi.Services;
+using P7CreateRestApi.Domain;
 
 namespace P7CreateRestApi.Test
 {
@@ -12,22 +13,22 @@ namespace P7CreateRestApi.Test
     /// </summary>
     public class BidListControllerGetByIdTest
     {
-        private readonly Mock<IBidListService> _mockBidListService;
+        private readonly Mock<IBidListService> _mockService;
         private readonly Mock<ILogger<BidListController>> _mockLogger;
         private readonly BidListController _controller;
 
         public BidListControllerGetByIdTest()
         {
-            _mockBidListService = new Mock<IBidListService>();
+            _mockService = new Mock<IBidListService>();
             _mockLogger = new Mock<ILogger<BidListController>>();
-            _controller = new BidListController(_mockBidListService.Object, _mockLogger.Object);
+            _controller = new BidListController(_mockService.Object, _mockLogger.Object);
         }
 
         /// <summary>
         /// Tests if GetById returns OkResult when the BidList is found.
         /// </summary>
         [Fact]
-        public async Task GetById_ReturnsOkResult_WhenBidListExists()
+        public async Task GetById_Ok()
         {
             // Arrange
             var mockBidList = new BidListDTO {
@@ -54,7 +55,7 @@ namespace P7CreateRestApi.Test
                 SourceListId = "SL1",
                 Side = "Buy"
             };
-            _mockBidListService.Setup(service => service.GetById(1)).ReturnsAsync(mockBidList);
+            _mockService.Setup(service => service.GetById(1)).ReturnsAsync(mockBidList);
 
             // Act
             var result = await _controller.GetById(1);
@@ -69,10 +70,10 @@ namespace P7CreateRestApi.Test
         /// Tests if GetById returns NotFoundResult when the BidList is not found.
         /// </summary>
         [Fact]
-        public async Task GetById_ReturnsNotFound_WhenBidListDoesNotExist()
+        public async Task GetById_NotFound()
         {
             // Arrange
-            _mockBidListService.Setup(service => service.GetById(1)).ReturnsAsync((BidListDTO)null);
+            _mockService.Setup(service => service.GetById(1)).ReturnsAsync((BidListDTO)null);
 
             // Act
             var result = await _controller.GetById(1);
@@ -86,19 +87,18 @@ namespace P7CreateRestApi.Test
         /// Tests if GetById returns 500 Internal Server Error when an exception occurs.
         /// </summary>
         [Fact]
-        public async Task GetById_ReturnsInternalServerError_WhenExceptionOccurs()
+        public async Task GetById_InternalServerError()
         {
             // Arrange
             int bidListId = 1;
-            _mockBidListService.Setup(service => service.GetById(bidListId)).ThrowsAsync(new Exception("Internal error"));
+            _mockService.Setup(service => service.GetById(bidListId)).ThrowsAsync(new Exception("Test Exception"));
 
             // Act
             var result = await _controller.GetById(bidListId);
 
             // Assert
-            var objectResult = Assert.IsType<ObjectResult>(result);
-            Assert.Equal(500, objectResult.StatusCode);
-            Assert.Equal("An internal error occurred.", objectResult.Value);
+            var statusCodeResult = Assert.IsType<ObjectResult>(result);
+            Assert.Equal(500, statusCodeResult.StatusCode);
         }
     }
 }

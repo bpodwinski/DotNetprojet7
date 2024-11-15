@@ -45,5 +45,22 @@ namespace P7CreateRestApi.Test
             var returnValue = Assert.IsType<List<RuleNameDTO>>(okResult.Value);
             Assert.Equal(2, returnValue.Count);
         }
+
+        /// <summary>
+        /// Tests if GetAll returns 500 Internal Server Error when an exception occurs.
+        /// </summary>
+        [Fact]
+        public async Task GetAll_InternalServerError()
+        {
+            // Arrange
+            _mockService.Setup(service => service.GetAll()).ThrowsAsync(new Exception("Test Exception"));
+
+            // Act
+            var result = await _controller.GetAll();
+
+            // Assert
+            var statusCodeResult = Assert.IsType<ObjectResult>(result);
+            Assert.Equal(500, statusCodeResult.StatusCode);
+        }
     }
 }

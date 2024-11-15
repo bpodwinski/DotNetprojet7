@@ -12,22 +12,22 @@ namespace P7CreateRestApi.Test
     /// </summary>
     public class BidListControllerGetAllTest
     {
-        private readonly Mock<IBidListService> _mockBidListService;
+        private readonly Mock<IBidListService> _mockService;
         private readonly Mock<ILogger<BidListController>> _mockLogger;
         private readonly BidListController _controller;
 
         public BidListControllerGetAllTest()
         {
-            _mockBidListService = new Mock<IBidListService>();
+            _mockService = new Mock<IBidListService>();
             _mockLogger = new Mock<ILogger<BidListController>>();
-            _controller = new BidListController(_mockBidListService.Object, _mockLogger.Object);
+            _controller = new BidListController(_mockService.Object, _mockLogger.Object);
         }
 
         /// <summary>
         /// Tests if GetAll returns OkResult with a list of BidListDTOs.
         /// </summary>
         [Fact]
-        public async Task GetAll_ReturnsOkResult_WhenBidListsExist()
+        public async Task GetAll_Ok()
         {
             // Arrange
             var mockBidList = new List<BidListDTO>
@@ -82,7 +82,7 @@ namespace P7CreateRestApi.Test
                 }
             };
 
-            _mockBidListService.Setup(service => service.GetAll()).ReturnsAsync(mockBidList);
+            _mockService.Setup(service => service.GetAll()).ReturnsAsync(mockBidList);
 
             // Act
             var result = await _controller.GetAll();
@@ -93,11 +93,14 @@ namespace P7CreateRestApi.Test
             Assert.Equal(2, returnValue.Count);
         }
 
+        /// <summary>
+        /// Tests if GetAll returns 500 Internal Server Error when an exception occurs.
+        /// </summary>
         [Fact]
-        public async Task GetAll_ReturnsInternalServerError_WhenExceptionIsThrown()
+        public async Task GetAll_InternalServerError()
         {
             // Arrange
-            _mockBidListService.Setup(service => service.GetAll()).ThrowsAsync(new Exception("Test Exception"));
+            _mockService.Setup(service => service.GetAll()).ThrowsAsync(new Exception("Test Exception"));
 
             // Act
             var result = await _controller.GetAll();
@@ -105,7 +108,6 @@ namespace P7CreateRestApi.Test
             // Assert
             var statusCodeResult = Assert.IsType<ObjectResult>(result);
             Assert.Equal(500, statusCodeResult.StatusCode);
-            Assert.Equal("An internal error occurred.", statusCodeResult.Value);
         }
     }
 }

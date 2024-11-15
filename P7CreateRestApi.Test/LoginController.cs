@@ -72,7 +72,7 @@ namespace P7CreateRestApi.Test
         /// Ensures that a successful login returns a 200 OK response with the expected data.
         /// </summary>
         [Fact]
-        public async Task Login_ShouldReturnOkResult_WithValidCredentials()
+        public async Task Login_ValidCredentials()
         {
             // Arrange
             var loginModel = new LoginModel { Username = "testuser", Password = "Test@123" };
@@ -114,7 +114,7 @@ namespace P7CreateRestApi.Test
         /// Ensures that an unsuccessful login returns a 401 Unauthorized response.
         /// </summary>
         [Fact]
-        public async Task Login_ShouldReturnUnauthorized_WithInvalidCredentials()
+        public async Task Login_InvalidCredentials()
         {
             // Arrange
             var loginModel = new LoginModel { Username = "wronguser", Password = "WrongPassword" };
@@ -137,12 +137,39 @@ namespace P7CreateRestApi.Test
             Assert.Equal("Invalid username or password", response["message"]);
         }
 
+        [Fact]
+        public async Task Login_InvalidPassword()
+        {
+            // Arrange
+            var loginModel = new LoginModel { Username = "testuser", Password = "WrongPassword" };
+            var user = new User { UserName = "testuser", Id = 123 };
+
+            // Simulate that a valid user is found
+            _userManagerMock.Setup(um => um.FindByNameAsync(loginModel.Username))
+                .ReturnsAsync(user);
+
+            // Simulate an incorrect password
+            _userManagerMock.Setup(um => um.CheckPasswordAsync(user, loginModel.Password))
+                .ReturnsAsync(false);
+
+            // Act
+            var result = await _authController.Login(loginModel);
+
+            // Assert
+            var unauthorizedResult = Assert.IsType<UnauthorizedObjectResult>(result);
+            var responseJson = JsonSerializer.Serialize(unauthorizedResult.Value);
+            var response = JsonSerializer.Deserialize<Dictionary<string, string>>(responseJson);
+
+            Assert.NotNull(response);
+            Assert.Equal("Invalid username or password", response["message"]);
+        }
+
         /// <summary>
         /// Tests the login functionality when an internal exception occurs.
         /// Ensures that an internal error results in a 500 Internal Server Error response.
         /// </summary>
         [Fact]
-        public async Task Login_ShouldReturnServerError_WhenExceptionOccurs()
+        public async Task Login_ServerError()
         {
             // Arrange
             var loginModel = new LoginModel { Username = "testuser", Password = "Test@123" };

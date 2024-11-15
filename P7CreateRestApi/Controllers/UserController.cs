@@ -60,11 +60,13 @@ namespace P7CreateRestApi.Controllers
             {
                 _logger.LogInformation("Adding a new user.");
                 var user = await _userService.Create(dto);
+
                 if (user is not null)
                 {
                     _logger.LogInformation("User created with ID {Id}.", user.Id);
                     return CreatedAtAction(nameof(GetById), new { id = user.Id }, user);
                 }
+
                 _logger.LogWarning("Unable to create user.");
                 return BadRequest("Unable to create user.");
             }
@@ -203,7 +205,7 @@ namespace P7CreateRestApi.Controllers
             catch (UnauthorizedAccessException ex)
             {
                 _logger.LogWarning(ex, "Unauthorized deletion attempt by user ID {UserId}.", id);
-                return StatusCode(403, new { message = ex.Message });
+                return StatusCode(403, new { message = "Unauthorized deletion attempt by user ID" });
             }
             catch (Exception ex)
             {

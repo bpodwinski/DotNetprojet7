@@ -27,7 +27,7 @@ namespace P7CreateRestApi.Test
         /// Tests if Create returns CreatedAtActionResult when a new Rating is created.
         /// </summary>
         [Fact]
-        public async Task Create_ReturnsCreatedAtActionResult()
+        public async Task Create_Ok()
         {
             // Arrange
             var newRating = new RatingDTO { Id = 1, MoodysRating = "A1", SandPRating = "AA+", FitchRating = "A+", OrderNumber = 1 };
@@ -46,7 +46,7 @@ namespace P7CreateRestApi.Test
         /// Tests if Create returns BadRequestResult when the model state is invalid.
         /// </summary>
         [Fact]
-        public async Task Create_ReturnsBadRequestResult_WhenModelStateIsInvalid()
+        public async Task Create_ModelStateInvalid()
         {
             // Arrange
             _controller.ModelState.AddModelError("MoodysRating", "The MoodysRating field is required.");
@@ -56,6 +56,24 @@ namespace P7CreateRestApi.Test
 
             // Assert
             Assert.IsType<BadRequestObjectResult>(result);
+        }
+
+        /// <summary>
+        /// Tests if Create returns 500 Internal Server Error when an exception is thrown in the service.
+        /// </summary>
+        [Fact]
+        public async Task Create_InternalServerError()
+        {
+            // Arrange
+            var newRating = new RatingDTO { Id = 1, MoodysRating = "A1", SandPRating = "AA+", FitchRating = "A+", OrderNumber = 1 };
+            _mockService.Setup(service => service.Create(It.IsAny<RatingDTO>())).ThrowsAsync(new Exception("Database error"));
+
+            // Act
+            var result = await _controller.Create(newRating);
+
+            // Assert
+            var serverErrorResult = Assert.IsType<ObjectResult>(result);
+            Assert.Equal(500, serverErrorResult.StatusCode);
         }
     }
 }
